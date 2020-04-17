@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="jquery-3.5.0.min.js"></script>
     <script src="Chart.bundle.min.js"></script>
+
     <link rel="stylesheet" href="bootstrap.min.css">
+
     <title>Paths of Coulerain</title>
 </head>
 
@@ -14,126 +17,8 @@
         <canvas id="myChart"></canvas>
     </div>
 
-    <script>
-        let ctx = document.getElementById('myChart').getContext('2d');
-
-        var myChart = new Chart(ctx, {
-            type: "doughnut",
-    data: {
-        datasets: [
-        {
-            backgroundColor: [,,, ,,,,,,,,,
-            
-
-            ],
-            data: [
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 1
-            ],
-            borderColor: 'black',
-            borderWidht: 2,
-            hoverBorderWidth: 4,
-            hoverBorderColor: "#ffcc66"
-        },
-        
-        {
-            backgroundColor: [,,,
-            "#339966", // Nature - Green
-            "#ccf2ff", // Heavens - Blue
-            "#e65c00", // Flame - Red
-
-            "#f5f5f0", // Life - Sun
-            "#ccccb3", // Between - Blue
-            "#999966", // Death - Moon
-
-            "#00004d", // Ice - Blue-Gray
-            "#660033", // Depths - Dark Brown
-            "#4d004d", // Necromancy - Purple
-            ],
-            data: [
-                0, 0, 0,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1
-            ],
-            borderColor: 'black',
-            borderWidht: 2,
-            hoverBorderWidth: 4,
-            hoverBorderColor: "#ffcc66"
-        },
-        {
-            backgroundColor: [
-            "white",
-            "#8c8c8c",
-            "#1a1a1a"
-            ],
-            data: [
-            1,
-            1,
-            1
-            ],
-            borderColor: 'black',
-            borderWidht: 2,
-            hoverBorderWidth: 4,
-            hoverBorderColor: "#ffcc66"
-        }],
-
-        labels: [
-        // Tier Enna
-        
-        "Tië Alta | Path of Light",
-        "Tië Gwath | Path of Shadow",
-        "Tië Dur | Path of Dark",
-        
-
-        // Tier Aira
-       
-        "Tië Lavan | Path of Nature",
-        "Tië Menel | Path of the Heavens",
-        "Tië Narë | Path of Flame",
-
-        "Tië Cuil | Path of Life",
-        "Tië Imbe | Path of the Between",
-        "Tië Gurth | Path of Death",
-
-        "Tië Nixë | Path of Ice",
-        "Tië Ambar | Path of the Depths",
-        "Tië Morgul | Path of Necromancy",
-        ],
-    },
-
-    options: {
-            responsive: true,
-            maintainAspeectRatio: true,
-
-            cutoutPercentage: 5,
-
-            legend: {
-                display: false
-            },
-
-            tooltips: {
-                titleFontSize: 24,
-                callbacks: {
-                    label: function(tooltipItems, data) { 
-                        return data.labels[tooltipItems.index];
-                    }
-                }
-            }
-       }
-
-    });
-
-    
-    </script>
+    <script src="paths.json"></script>
+    <script type="text/javascript" src="script.js"></script>
 </body>
 
 </html>

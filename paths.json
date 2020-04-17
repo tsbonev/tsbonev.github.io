@@ -1,0 +1,155 @@
+let pathsJson = {
+    "paths_categories": [
+        {
+            "id": "first_paths",
+            "common_name": "First Paths",
+            "old_speech_name": "Tier Enna"
+        },
+        {
+            "id": "old_paths",
+            "common_name": "Old Paths",
+            "old_speech_name": "Tier Aira"
+        },
+        {
+            "id": "new_path",
+            "common_name": "New Paths",
+            "old_speech_name": "Tier Sain"
+        },
+        {
+            "id": "lone_path",
+            "common_name": "Lone Paths",
+            "old_speech_name": "Tier Ero"
+        },
+        {
+            "id": "split_path",
+            "common_name": "Split Paths",
+            "old_speech_name": "Tier Rest"
+        }
+    ],
+    "paths_general": [
+        {
+            "id": "path_of_light",
+            "common_name": "Path of Light",
+            "old_speech_name": "Tië Alta",
+            "category_id": "first_paths"
+        },
+        {
+            "id": "path_of_shadow",
+            "common_name": "Path of Shadow",
+            "old_speech_name": "Tië Gwath",
+            "category_id": "first_paths"
+        },
+        {
+            "id": "path_of_dark",
+            "common_name": "Path of Dark",
+            "old_speech_name": "Tië Dur",
+            "category_id": "first_paths"
+        },
+        {
+            "id": "path_of_nature",
+            "common_name": "Path of Nature",
+            "old_speech_name": "Tië Lavan",
+            "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_heavens",
+            "common_name": "Path of the Heavens",
+            "old_speech_name": "Tië Menel",
+            "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_flame",
+            "common_name": "Path of Flame",
+            "old_speech_name": "Tië Narë",
+            "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_life",
+            "common_name": "Path of Life",
+            "old_speech_name": "Tië Cuil",
+            "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_between",
+            "common_name": "Path of the Between",
+            "old_speech_name": "Tië Imbe",
+            "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_death",
+            "common_name": "Path of Death",
+            "old_speech_name": "Tië Gurth",
+            "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_ice",
+            "common_name": "Path of Ice",
+            "old_speech_name": "Tië Nixë",
+            "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_depths",
+            "common_name": "Path of the Depths",
+            "old_speech_name": "Tië Ambar",
+            "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_necromancy",
+            "common_name": "Path of Necromancy",
+            "old_speech_name": "Tië Morgul",
+            "category_id": "old_paths"
+        }
+    ],
+    "paths_appaerance": [
+        // First Ring
+        {
+            "path_id": "path_of_light",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "path_of_shadow",
+            "color": "#8c8c8c"
+        },
+        {
+            "path_id": "path_of_dark",
+            "color": "#1a1a1a"
+        },
+        // Second Ring
+        {
+            "path_id": "path_of_nature",
+            "color": "#339966"
+        },
+        {
+            "path_id": "path_of_heavens",
+            "color": "#ccf2ff"
+        },
+        {
+            "path_id": "path_of_flame",
+            "color": "#e65c00"
+        },
+        {
+            "path_id": "path_of_life",
+            "color":  "#f5f5f0"
+        },
+        {
+            "path_id": "path_of_between",
+            "color": "#ccccb3"
+        },
+        {
+            "path_id": "path_of_death",
+            "color": "#999966"
+        },
+        {
+            "path_id": "path_of_ice",
+            "color":  "#00004d"
+        },
+        {
+            "path_id": "path_of_depths",
+            "color": "#660033"
+        },
+        {
+            "path_id": "path_of_necromancy",
+            "color": "#4d004d"
+        }
+    ]
+}
