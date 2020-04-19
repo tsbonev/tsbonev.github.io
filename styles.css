@@ -8,7 +8,8 @@
 }
 
 #path_content {
-	white-space: pre;
+	white-space: pre-wrap;
+
 }
 
 #chart_container {
