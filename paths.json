@@ -12,8 +12,51 @@ let pathsJson = {
             "id": "path_of_shadow",
             "content": "[FORMER] -*- Shadow Queen: Morreniel | Lady Who Watches from the Shadow\r\n-0- Aspect: Andunernilir | Mortals\r\n-^- Heralds { [FORMER] Morrigan Blackmist (PC) } \r\nMISC RELATED: { Aryon Ravenknight, The Raven's Daughter }"
         },
+        {
+            "id": "path_of_life",
+            "content": "[FORMER] -*- Queen: Rin'Ante | The Queen Who Gives, Morreniel\r\n-0- Aspect: The Living"
+        },
+        {
+            "id": "path_of_death",
+            "content": "[FORMER] -*- Queen: Rin'Leithia | The Queen Who Takes, Morreniel\r\n-0- Aspect: The Dead"
+        },
+        {
+            "id": "path_of_between",
+            "content": "[FORMER] -*- Queen: Rin'Craban | The Raven Queen, Morreniel\r\n-0- Aspect: Those Between Life and Death"
+        },
+        {
+            "id": "path_of_nature",
+            "content": ""
+        },
+        {
+            "id": "path_of_flame",
+            "content": "-*- Queen: Finniel\r\n[FORMER] -'- First Flame: Olorin Bronzebeard"
+        },
+        {
+            "id": "path_of_heavens",
+            "content": "-*- King: Harn'Istar Vaktelear | South Watchkeeper \/ the Merchant\r\n-'- Representative\r\n-^- Nesters { Little Bird, Tempest Priests }"
+        },
+        {
+            "id": "path_of_ice",
+            "content": ""
+        },
+        {
+            "id": "path_of_depths",
+            "content": ""
+        },
+        {
+            "id": "path_of_necromancy",
+            "content": "[FORMER] -*- High Necromancer: Meinherdir Lorian Ara'Tur | Ara'Dur, The Dark King\r\n[FORMER] -*- High Necromancer: Kai'ral Levilleur \r\n-0- Aspect: The Undead"
+        },
+        {
+            "id": "path_of_song",
+            "content": "[FORMER] -*- Storyteller: Gelirglind Lorian (Naergon Naylor)\r\n-0- Aspect: Songs and tales, knowledge and prophecy\r\n[FORMER] -^- Singers { Doram and Saram Greyjay }"
+        },
+        {
+            "id": "path_of_craft",
+            "content": "-|- Pathmaker: Lilith Lumerin the Clockwork Queen\r\n-0- Aspect: The Clockworks \/ The Warforged\r\n-'- High Sentinel: Andurin Chernit\r\n-'- Dragonslayer: Duronar Chernit\r\n-=- High Drone: Gwedhiel the Clockwork Priestess"
+        }
     ],
-
     "paths_categories": [
         {
             "id": "first_paths",
@@ -26,17 +69,17 @@ let pathsJson = {
             "old_speech_name": "Tier Aira"
         },
         {
-            "id": "new_path",
+            "id": "new_paths",
             "common_name": "New Paths",
             "old_speech_name": "Tier Sain"
         },
         {
-            "id": "lone_path",
+            "id": "lone_paths",
             "common_name": "Lone Paths",
             "old_speech_name": "Tier Ero"
         },
         {
-            "id": "split_path",
+            "id": "split_paths",
             "common_name": "Split Paths",
             "old_speech_name": "Tier Rest"
         }
@@ -113,6 +156,18 @@ let pathsJson = {
             "common_name": "Path of Necromancy",
             "old_speech_name": "Tië Morgul",
             "category_id": "old_paths"
+        },
+        {
+            "id": "path_of_song",
+            "common_name": "Path of Song",
+            "old_speech_name": "Tië Glind",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "path_of_craft",
+            "common_name": "Path of Craft",
+            "old_speech_name": "Tië Maenas",
+            "category_id": "new_paths"
         }
     ],
     "paths_appaerance": [
@@ -144,7 +199,7 @@ let pathsJson = {
         },
         {
             "path_id": "path_of_life",
-            "color":  "#f5f5f0"
+            "color": "#f5f5f0"
         },
         {
             "path_id": "path_of_between",
@@ -156,7 +211,7 @@ let pathsJson = {
         },
         {
             "path_id": "path_of_ice",
-            "color":  "#00004d"
+            "color": "#00004d"
         },
         {
             "path_id": "path_of_depths",
@@ -165,6 +220,15 @@ let pathsJson = {
         {
             "path_id": "path_of_necromancy",
             "color": "#4d004d"
+        },
+        // New Paths
+        {
+            "path_id": "path_of_song",
+            "color": "#ffe6ff"
+        },
+        {
+            "path_id": "path_of_craft",
+            "color": "#cd7f32"
         }
     ]
 }

@@ -1,12 +1,35 @@
 .card-img-top {
-    width: auto;
-    height: 10vw;
+	width: auto;
+	height: 10vw;
 }
 
 #path_card_container {
-    display: none;
+	display: none;
 }
 
 #path_content {
-    white-space: pre;
+	white-space: pre;
+}
+
+#chart_container {
+	position: relative;
+	height: 400px;
+	width: 400px;
+}
+
+#oldPathsChart,
+#newPathsChart {
+	position: absolute;
+}
+
+#oldPathsChart {
+	top: 0px;
+	left: 0px;
+}
+
+#newPathsChart {
+	border-radius: 150px;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
