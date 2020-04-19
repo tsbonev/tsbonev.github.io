@@ -1,0 +1,12 @@
+.card-img-top {
+    width: auto;
+    height: 10vw;
+}
+
+#path_card_container {
+    display: none;
+}
+
+#path_content {
+    white-space: pre;
+}

@@ -1,4 +1,19 @@
 let pathsJson = {
+    "paths_content": [
+        {
+            "id": "path_of_light",
+            "content": "-|- Pathmaker: Lumetan | The Watchmaker\r\n-0- Aspect: Istari | The Watchkeepers\r\n-'- Lightbringer: Dun'Istar | Western Watchkeeper\r\n[FORMER] -=- Knight: Dorian Bridgewater"
+        },
+        {
+            "id": "path_of_dark",
+            "content": "-|- Pathmaker: Dur'Athal | The Stranger\r\n-0- Aspect: Athalarasi | The Stranger Kings/Queens"
+        },
+        {
+            "id": "path_of_shadow",
+            "content": "[FORMER] -*- Shadow Queen: Morreniel | Lady Who Watches from the Shadow\r\n-0- Aspect: Andunernilir | Mortals\r\n-^- Heralds { [FORMER] Morrigan Blackmist (PC) } \r\nMISC RELATED: { Aryon Ravenknight, The Raven's Daughter }"
+        },
+    ],
+
     "paths_categories": [
         {
             "id": "first_paths",

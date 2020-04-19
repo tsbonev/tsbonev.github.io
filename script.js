@@ -2,14 +2,6 @@ let ctx = document.getElementById('myChart').getContext('2d');
 
 let path_data = pathsJson;
 
-let pLight_appr = path_data.paths_appaerance.find(x => x.path_id === "path_of_light")
-let pDark_appr = path_data.paths_appaerance.find(x => x.path_id === "path_of_dark")
-let pShadow_appr = path_data.paths_appaerance.find(x => x.path_id == "path_of_shadow")
-
-let pLight_general = path_data.paths_general.find(x => x.id = "path_of_light")
-let pDark_general = path_data.paths_general.find(x => x.id = "path_of_dark")
-let pShadow_general = path_data.paths_general.find(x => x.id = "path_of_shadow")
-
 let pathsLabels = path_data.paths_general.map(x => x.common_name + ' | ' + x.old_speech_name);
 
 var pathsDatasets = [
@@ -19,6 +11,9 @@ var pathsDatasets = [
         1,
         1,
         1
+    ],
+    ids: [
+
     ],
     borderColor: 'black',
     borderWidht: 2,
@@ -30,7 +25,10 @@ var pathsDatasets = [
 
     data: [
         0, 0, 0,
-        1, 1, 1,  1, 1, 1,  1, 1, 1
+        1, 1, 1,  1, 1, 1, 1, 1, 1
+    ],
+    ids: [
+        '', '', '',
     ],
     borderColor: 'black',
     borderWidht: 2,
@@ -45,6 +43,9 @@ var pathsDatasets = [
                     1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1
+                ],
+                ids: [
+                    '', '', '',  '', '', '',,  '', '', '',  '', '', '',
                 ],
                 borderColor: 'black',
                 borderWidht: 2,
@@ -65,6 +66,7 @@ path_data.paths_appaerance.forEach(element => {
         currentLimit++;
     }
         pathsDatasets[currentLimit].backgroundColor.push(element.color)
+        pathsDatasets[currentLimit].ids.push(element.path_id)
 
     currentIndex++;
 });
@@ -91,11 +93,42 @@ var myChart = new Chart(ctx, {
             titleFontSize: 24,
             callbacks: {
                 label: function (tooltipItems, data) {  
-                    console.log(data)
                     return data.labels[tooltipItems.index];
                 }
             }
-        }
+        },
+
+        onClick: showPathCard
     }
 
 });
+
+function showPathCard(event, array) {
+    let datasetIndex = array[0]._datasetIndex;
+    let objectIndex = array[0]._index; 
+
+    let pathId = pathsDatasets[datasetIndex].ids[objectIndex];
+
+    console.log(pathId)
+
+    //Building
+    let path_general = path_data.paths_general.find(x => x.id === pathId)
+    let path_appaerance = path_data.paths_appaerance.find(x => x.path_id === pathId);
+    let pathName = path_general.common_name + " | " + path_general.old_speech_name;
+
+    let path_category = path_data.paths_categories.find(x => x.id === path_general.category_id)
+
+    let pathCategoryName = path_category.common_name + " | " + path_category.old_speech_name;
+
+    let path_content = path_data.paths_content.find(x => x.id === pathId)
+
+    let pathContent = path_content.content
+
+    //Display the card
+    $("#path_card_container").css("display", "block");
+
+    $("#path_name").text(pathName)
+    $("#path_category").text(pathCategoryName)
+    $("#path_content").text(pathContent)
+    $("#path_image").attr("src", "img/" + pathId + ".png")
+}
