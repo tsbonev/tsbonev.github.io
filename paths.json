@@ -2,59 +2,67 @@ let pathsJson = {
     "paths_content": [
         {
             "id": "path_of_light",
-            "content": "-|- Pathmaker: Lumetan | The Watchmaker\r\n-0- Aspect: Istari | The Watchkeepers\r\n-'- Lightbringer: Dun'Istar | Western Watchkeeper\r\n[FORMER] -=- Knight: Dorian Bridgewater"
+            "content": "-|- Pathmaker: Lumetan Ban'Athal | The Watchmaker\r\n-0- Aspect: Istari | The Watchkeepers\r\n[FORMER] -'- Lightbringer: Edwenrain Lorian Ara'Mar | Dun'Istar, The Western Watchkeeper\r\n[FORMER] -=- Knight: Dorian Bridgewater" 
         },
         {
             "id": "path_of_dark",
-            "content": "-|- Pathmaker: Dur'Athal | The Stranger\r\n-0- Aspect: Athalarasi | The Stranger Kings/Queens"
+            "content": "-|- Pathmaker: Dur'Athal | The Stranger\r\n-0- Aspect: Athalarasi | The Stranger Kings\r\n-'- Magi:\r\n-=- Duskbringer:" 
         },
         {
             "id": "path_of_shadow",
-            "content": "[FORMER] -*- Shadow Queen: Morreniel | Lady Who Watches from the Shadow\r\n-0- Aspect: Andunernilir | Mortals\r\n-^- Heralds { [FORMER] Morrigan Blackmist (PC) } \r\nMISC RELATED: { Aryon Ravenknight, The Raven's Daughter }"
+            "content": "[FORMER] -*- Shadow Queen: Morreniel | Lady Who Watches from the Shadow\r\n-*- Shadow King: Aryon Ravenknight, The Raven King\r\n-0- Aspect: Andunernilir | Mortals\r\n-X- Shadow's Heir: Hilliel Morreniel, The Raven's Daughter\r\n-'- Shadow's Sword:\r\n-~- Death Knights\r\n[FORMER] -^- Heralds { Morrigan Blackmist (PC) } "
         },
         {
             "id": "path_of_life",
-            "content": "[FORMER] -*- Queen: Rin'Ante | The Queen Who Gives, Morreniel\r\n-0- Aspect: The Living"
+            "content": "[FORMER] -*- Queen: Rin'Ante | The Queen Who Gives, Morreniel\r\n-*- Queen: Emel, The Mother\r\n-0- Aspect: The Living\r\n-'- Champion: Cuilh\u00FBg, The Serpent\r\n-=- Healer:"
         },
         {
             "id": "path_of_death",
-            "content": "[FORMER] -*- Queen: Rin'Leithia | The Queen Who Takes, Morreniel\r\n-0- Aspect: The Dead"
+            "content": "[FORMER] -*- Queen: Rin'Leithia | The Queen Who Takes, Morreniel\r\n-*- King: Sairweg, The Old Man \r\n-0- Aspect: The Dead\r\n-'- Champion: Lath Ropeburn, The Executioner\r\n-=- Gravedigger:"
         },
         {
             "id": "path_of_between",
-            "content": "[FORMER] -*- Queen: Rin'Craban | The Raven Queen, Morreniel\r\n-0- Aspect: Those Between Life and Death"
+            "content": "[FORMER] -*- Queen: Rin'Craban | The Raven Queen, Morreniel\r\n-*- King: Mavar, The Shepherd\r\n-0- Aspect: Those Between Life and Death\r\n-'- Champion: Emerro, The Herder\r\n-=- Griever: Captain Linen Healbright"
         },
         {
             "id": "path_of_nature",
-            "content": ""
+            "content": "-*- Druid Queen:\r\n-0- Aspect: Autumn Creatures, Druids, Halflings\r\n-'- High Druid:\r\n-=- Nurturer:"
         },
         {
             "id": "path_of_flame",
-            "content": "-*- Queen: Finniel\r\n[FORMER] -'- First Flame: Olorin Bronzebeard"
+            "content": "-*- Burnt Queen: Finniel\r\n-0- Aspect: Summer Creatures, Humans, Tieflings\r\n[FORMER] -'- First Flame: Olorin Bronzebeard\r\n-=- Fire Warden:"
         },
         {
             "id": "path_of_heavens",
-            "content": "-*- King: Harn'Istar Vaktelear | South Watchkeeper \/ the Merchant\r\n-'- Representative\r\n-^- Nesters { Little Bird, Tempest Priests }"
+            "content": "-*- Sky King: Harn'Istar Vaktelear | Southern Watchkeeper, The Merchant\r\n-0- Aspect: Sky Creatures, Elves\r\n-'- Representative:\r\n-~- Flock\r\n-^- Nesters { Little Bird, Tempest Priests }"
         },
         {
             "id": "path_of_ice",
-            "content": ""
+            "content": "-*- Frostlord:\r\n-0- Aspect: Winter Creatures, Giants, Goliaths\r\n-'- Winter's Knight:\r\n-=- Frozen One:"
         },
         {
             "id": "path_of_depths",
-            "content": ""
+            "content": "-*- Deep King:\r\n-0- Aspect: Spring Creatures, Treants, Dwarves\r\n-'- Guardian:\r\n-=- Forester:"
         },
         {
             "id": "path_of_necromancy",
-            "content": "[FORMER] -*- High Necromancer: Meinherdir Lorian Ara'Tur | Ara'Dur, The Dark King\r\n[FORMER] -*- High Necromancer: Kai'ral Levilleur \r\n-0- Aspect: The Undead"
-        },
+            "content": "[FORMER] -*- High Necromancer: Meinherdir Lorian Ara'Tur | Ara'Dur, The Dark King\r\n[FORMER] -*- High Necromancer: Kai'ral Levilleur (PC)\r\n-0- Aspect: The Undead\r\n-~- Horde\r\n-=- Tombkeeper:"
+         },
         {
             "id": "path_of_song",
-            "content": "[FORMER] -*- Storyteller: Gelirglind Lorian (Naergon Naylor)\r\n-0- Aspect: Songs and tales, knowledge and prophecy\r\n[FORMER] -^- Singers { Doram and Saram Greyjay }"
+            "content": "[FORMER] -*- Storyteller: Gelirglind Lorian (Naergon Naylor)\r\n-0- Aspect: Songs and Tales, Knowledge and Prophecy\r\n[FORMER] -^- Singers { Doram and Saram Greyjay }"
         },
         {
             "id": "path_of_craft",
             "content": "-|- Pathmaker: Lilith Lumerin the Clockwork Queen\r\n-0- Aspect: The Clockworks \/ The Warforged\r\n-'- High Sentinel: Andurin Chernit\r\n-'- Dragonslayer: Duronar Chernit\r\n-=- High Drone: Gwedhiel the Clockwork Priestess"
+        },
+        {
+            "id": "path_of_fate",
+            "content": "--- Prince of Paths: Tiergon | Valiar Breakspear\r\n-|- Pathmaker: Amarthen Lorr\r\n-0- Aspect: The Ring of Lorian, Those Freed from Fate\r\n-^- Amarthernilir { The Party (PCs) }"
+        },
+        {
+            "id": "path_of_wanderer",
+            "content": "-*- Lost King:\r\n-0- Aspects: Those Who Are Lost Souls, Those Who Wander\r\n-'- Guide:\r\n-^- Wardens of the Way\r\n-=- Trailkeeper: "
         }
     ],
     "paths_categories": [
@@ -157,10 +165,161 @@ let pathsJson = {
             "old_speech_name": "Tië Morgul",
             "category_id": "old_paths"
         },
+        // New Paths
+        {
+            "id": "path_of_fate",
+            "common_name": "Path of Fate",
+            "old_speech_name": "Tië Amarth",
+            "category_id": "new_paths"
+        },
         {
             "id": "path_of_song",
             "common_name": "Path of Song",
             "old_speech_name": "Tië Glind",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "path_of_wanderer",
+            "common_name": "Path of the Wanderer",
+            "old_speech_name": "Tië Randír",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
             "category_id": "new_paths"
         },
         {
@@ -223,8 +382,108 @@ let pathsJson = {
         },
         // New Paths
         {
+            "path_id": "path_of_fate",
+            "color": "#ffb84d"
+        },
+        {
             "path_id": "path_of_song",
             "color": "#ffe6ff"
+        },
+        {
+            "path_id": "path_of_wanderer",
+            "color": "#669999"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
         },
         {
             "path_id": "path_of_craft",
