@@ -79,6 +79,10 @@ let pathsJson = {
         {
             "id": "path_of_madness",
             "content": "-*- The Witch-King:\r\n-*- The Demon-King:\r\n-0- Aspect: Feywild, Nine Hells\/Shadowfell\r\n-'- Archwitch:\r\n-'- Archdemon:"
+        },
+        {
+            "id": "path_of_dreams",
+            "content":"-*- Ever-Dreaming Queen:\r\n-0- Aspect: Dreams, Fantasies, The Mind\r\n-X- Nightmare:\r\n-'- Sandman:\r\n-^- Dreamweavers\r\n-=- Luller:"
         }
     ],
     "paths_categories": [
@@ -243,10 +247,10 @@ let pathsJson = {
             "category_id": "split_paths"
         },
         {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
+            "id": "path_of_dreams",
+            "common_name": "Path of Dreams",
+            "old_speech_name": "Tië Lórë",
+            "category_id": "lone_paths"
         },
         {
             "id": "path_of_wanderer",
@@ -439,7 +443,7 @@ let pathsJson = {
             "color": "#cc0000"
         },
         {
-            "path_id": "unknown_path",
+            "path_id": "path_of_dreams",
             "color": "#ffecb3"
         },
         {
