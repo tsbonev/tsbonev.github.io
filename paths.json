@@ -63,6 +63,22 @@ let pathsJson = {
         {
             "id": "path_of_wanderer",
             "content": "-*- Lost King:\r\n-0- Aspects: Those Who Are Lost Souls, Those Who Wander\r\n-'- Guide:\r\n-^- Wardens of the Way\r\n-=- Trailkeeper: "
+        },
+        {
+            "id": "path_of_arcane",
+            "content": "-*- Archmage:\r\n-0- Aspect: Non-Domain Magic and Arcane Knowledge, Science\r\n-X- Antimage:\r\n-'- Battlemage:\r\n-^- Scholars\r\n-=- Arcane Apprentice:"
+        },
+        {
+            "id": "path_of_corruption",
+            "content": "-*- Patchwork King:\r\n-0- Aspect: Aberrations\r\n-X- Refuser: \r\n-'- Tailor:\r\n-~- The Mind Flayers\r\n-^- Corruption Priests\r\n-=- Betrayer:"
+        },
+        {
+            "id": "path_of_sanity",
+            "content": "-*- Grand Witch Hunter:\r\n-*- Grand Demon Slayer:\r\n-0- Aspect: Border of the Material Plane\r\n-'- Knight of Sanity:\r\n-'- Knight of Purity:"
+        },
+        {
+            "id": "path_of_madness",
+            "content": "-*- The Witch-King:\r\n-*- The Demon-King:\r\n-0- Aspect: Feywild, Nine Hells\/Shadowfell\r\n-'- Archwitch:\r\n-'- Archdemon:"
         }
     ],
     "paths_categories": [
@@ -167,165 +183,165 @@ let pathsJson = {
         },
         // New Paths
         {
-            "id": "path_of_fate",
-            "common_name": "Path of Fate",
-            "old_speech_name": "Tië Amarth",
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
             "category_id": "new_paths"
         },
         {
-            "id": "path_of_song",
-            "common_name": "Path of Song",
-            "old_speech_name": "Tië Glind",
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "path_of_sanity",
+            "common_name": "Path of Sanity",
+            "old_speech_name": "Tië Sámaglân",
+            "category_id": "split_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
             "category_id": "new_paths"
         },
         {
             "id": "path_of_wanderer",
             "common_name": "Path of the Wanderer",
             "old_speech_name": "Tië Randír",
-            "category_id": "new_paths"
+            "category_id": "lone_paths"
         },
         {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
+            "id": "path_of_song",
+            "common_name": "Path of Song",
+            "old_speech_name": "Tië Glind",
+            "category_id": "lone_paths"
         },
         {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
-        },
-        {
-            "id": "empty_path",
-            "common_name": "Unknown",
-            "old_speech_name": "Path",
-            "category_id": "new_paths"
+            "id": "path_of_fate",
+            "common_name": "Path of Fate",
+            "old_speech_name": "Tië Amarth",
+            "category_id": "lone_paths"
         },
         {
             "id": "path_of_craft",
             "common_name": "Path of Craft",
             "old_speech_name": "Tië Maenas",
+            "category_id": "lone_paths"
+        },
+        {
+            "id": "path_of_arcane",
+            "common_name": "Path of the Arcane",
+            "old_speech_name": "Tië Ingolë",
+            "category_id": "lone_paths"
+        },
+        {
+            "id": "path_of_corruption",
+            "common_name": "Path of Corruption",
+            "old_speech_name": "Tië Qeleksie",
+            "category_id": "lone_paths"
+        },
+        {
+            "id": "path_of_madness",
+            "common_name": "Path of Madness",
+            "old_speech_name": "Tië Sámalórië",
+            "category_id": "split_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
+            "category_id": "new_paths"
+        },
+        {
+            "id": "empty_path",
+            "common_name": "Unknown",
+            "old_speech_name": "Path",
             "category_id": "new_paths"
         }
     ],
@@ -346,7 +362,7 @@ let pathsJson = {
         // Second Ring
         {
             "path_id": "path_of_nature",
-            "color": "#339966"
+            "color": "#ccffe6"
         },
         {
             "path_id": "path_of_heavens",
@@ -354,7 +370,7 @@ let pathsJson = {
         },
         {
             "path_id": "path_of_flame",
-            "color": "#e65c00"
+            "color": "#ffd9cc"
         },
         {
             "path_id": "path_of_life",
@@ -362,132 +378,133 @@ let pathsJson = {
         },
         {
             "path_id": "path_of_between",
-            "color": "#ccccb3"
+            "color": "#A1A192"
         },
         {
             "path_id": "path_of_death",
-            "color": "#999966"
+            "color": "#4d4d33"
         },
         {
             "path_id": "path_of_ice",
-            "color": "#00004d"
+            "color": "#00264d"
         },
         {
             "path_id": "path_of_depths",
-            "color": "#660033"
+            "color": "#4d0000"
         },
         {
             "path_id": "path_of_necromancy",
             "color": "#4d004d"
         },
         // New Paths
+        
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "path_of_sanity",
+            "color": "#cc0000"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffecb3"
+        },
+        {
+            "path_id": "path_of_wanderer",
+            "color": "#ffbf00"
+        },
+        {
+            "path_id": "path_of_song",
+            "color": "#cd7f32"
+        },
         {
             "path_id": "path_of_fate",
             "color": "#ffb84d"
         },
         {
-            "path_id": "path_of_song",
-            "color": "#ffe6ff"
-        },
-        {
-            "path_id": "path_of_wanderer",
-            "color": "#669999"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
-            "path_id": "unknown_path",
-            "color": "#ffffff"
-        },
-        {
             "path_id": "path_of_craft",
             "color": "#cd7f32"
+        },
+        {
+            "path_id": "path_of_arcane",
+            "color": "#ffbf00"
+        },
+        {
+            "path_id": "path_of_corruption",
+            "color": "#ffecb3"
+        },
+        {
+            "path_id": "path_of_madness",
+            "color": "#cc0000"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
+        },
+        {
+            "path_id": "unknown_path",
+            "color": "#ffffff"
         }
     ]
 }

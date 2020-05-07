@@ -80,6 +80,8 @@ var myChart = new Chart(ctx, {
     },
 
     options: {
+
+        rotation: -1.5 * Math.PI,
         responsive: true,
         maintainAspeectRatio: true,
 
