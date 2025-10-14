@@ -4,6 +4,7 @@
 	let popover = null;
 	let dragSelect = null;
 	let pan = null;
+	let seatDrag = null;
 
 	function intersects(a, b) {
 		if (a.type === 'circle' && b.type === 'circle') {
@@ -166,9 +167,23 @@
 		}
 
 		if (seatNode) {
-			openSeatPopover(seatNode, e.clientX, e.clientY);
-			e.preventDefault();
-			return;
+			// Check if this seat has a guest assigned
+			const tableId = seatNode.dataset.tableId;
+			const seatIndex = Number(seatNode.dataset.index);
+			const table = getTable(tableId);
+			const guestId = table && table.assignments ? table.assignments[String(seatIndex)] : null;
+
+			if (guestId) {
+				// Start seat drag for assigned guest
+				startSeatDrag(seatNode, e.clientX, e.clientY, tableId, seatIndex, guestId);
+				e.preventDefault();
+				return;
+			} else {
+				// Open popover for unassigned seat
+				openSeatPopover(seatNode, e.clientX, e.clientY);
+				e.preventDefault();
+				return;
+			}
 		}
 
 		if (tableNode) {
@@ -480,6 +495,176 @@
 		document.removeEventListener('mousemove', onPanMove);
 		document.removeEventListener('mouseup', onPanUp);
 		pan = null;
+	}
+
+	function startSeatDrag(seatNode, clientX, clientY, tableId, seatIndex, guestId) {
+		closePopover();
+
+		// Disable hover animations during drag
+		const canvas = document.getElementById('canvas');
+		canvas.classList.add('seat-dragging');
+
+		// Create drag preview element
+		const dragPreview = seatNode.cloneNode(true);
+		dragPreview.style.position = 'fixed';
+		dragPreview.style.pointerEvents = 'none';
+		dragPreview.style.zIndex = '10000';
+		dragPreview.style.transform = 'translate(-50%, -50%)';
+		dragPreview.style.opacity = '0.8';
+		dragPreview.classList.add('seat-drag-preview');
+		document.body.appendChild(dragPreview);
+
+		seatDrag = {
+			seatNode,
+			dragPreview,
+			tableId,
+			seatIndex,
+			guestId,
+			startX: clientX,
+			startY: clientY,
+			lastX: clientX,
+			lastY: clientY
+		};
+
+		// Update drag preview position to follow cursor exactly
+		updateSeatDragPreview(clientX, clientY);
+
+		document.addEventListener('mousemove', onSeatDragMove);
+		document.addEventListener('mouseup', onSeatDragUp);
+	}
+
+	function onSeatDragMove(e) {
+		if (!seatDrag) return;
+
+		// Use requestAnimationFrame for smoother updates
+		if (!seatDrag.rafId) {
+			seatDrag.rafId = requestAnimationFrame(() => {
+				updateSeatDragPreview(seatDrag.lastX, seatDrag.lastY);
+				updateSeatDropTargets(seatDrag.lastX, seatDrag.lastY);
+				seatDrag.rafId = null;
+			});
+		}
+
+		// Store the latest mouse position
+		seatDrag.lastX = e.clientX;
+		seatDrag.lastY = e.clientY;
+	}
+
+	function onSeatDragUp(e) {
+		if (!seatDrag) return;
+
+		// Cancel any pending animation frame
+		if (seatDrag.rafId) {
+			cancelAnimationFrame(seatDrag.rafId);
+			seatDrag.rafId = null;
+		}
+
+		// Clean up drag preview
+		if (seatDrag.dragPreview) {
+			seatDrag.dragPreview.remove();
+		}
+
+		// Re-enable hover animations
+		const canvas = document.getElementById('canvas');
+		canvas.classList.remove('seat-dragging');
+
+		// Clear all drop target highlights
+		clearSeatDropTargets();
+
+		// Find target seat
+		const targetSeat = findSeatAtPosition(e.clientX, e.clientY);
+
+		if (targetSeat && targetSeat !== seatDrag.seatNode) {
+			const targetTableId = targetSeat.dataset.tableId;
+			const targetSeatIndex = Number(targetSeat.dataset.index);
+
+			// Check if target seat is occupied
+			const targetTable = getTable(targetTableId);
+			const targetGuestId = targetTable && targetTable.assignments ? targetTable.assignments[String(targetSeatIndex)] : null;
+
+			if (targetGuestId) {
+				// Swap guests
+				window.TablePlanner.beginHistoryGroup();
+				window.TablePlanner.assignGuestToSeat(targetTableId, targetSeatIndex, seatDrag.guestId);
+				window.TablePlanner.assignGuestToSeat(seatDrag.tableId, seatDrag.seatIndex, targetGuestId);
+				window.TablePlanner.endHistoryGroup();
+			} else {
+				// Move guest to empty seat
+				window.TablePlanner.assignGuestToSeat(targetTableId, targetSeatIndex, seatDrag.guestId);
+			}
+		}
+
+		document.removeEventListener('mousemove', onSeatDragMove);
+		document.removeEventListener('mouseup', onSeatDragUp);
+		seatDrag = null;
+	}
+
+	function updateSeatDragPreview(clientX, clientY) {
+		if (!seatDrag || !seatDrag.dragPreview) return;
+
+		// Position the drag preview exactly at the cursor
+		seatDrag.dragPreview.style.left = clientX + 'px';
+		seatDrag.dragPreview.style.top = clientY + 'px';
+
+		// Log the position for debugging (only every 10th move to reduce spam)
+		if (!seatDrag.logCounter) seatDrag.logCounter = 0;
+		seatDrag.logCounter++;
+		if (seatDrag.logCounter % 10 === 0) {
+			const rect = seatDrag.dragPreview.getBoundingClientRect();
+		}
+	}
+
+	function updateSeatDropTargets(clientX, clientY) {
+		// Clear previous highlights
+		clearSeatDropTargets();
+
+		// Find seat under cursor
+		const targetSeat = findSeatAtPosition(clientX, clientY);
+
+		if (targetSeat && targetSeat !== seatDrag.seatNode) {
+			targetSeat.classList.add('seat-drop-target');
+		}
+	}
+
+	function clearSeatDropTargets() {
+		const seats = document.querySelectorAll('.seat');
+		seats.forEach(seat => seat.classList.remove('seat-drop-target'));
+	}
+
+	function findSeatAtPosition(clientX, clientY) {
+		const canvas = document.getElementById('canvas');
+		const canvasRect = canvas.getBoundingClientRect();
+		const zoom = window.TablePlanner.state.ui.zoom || 1;
+		const panX = window.TablePlanner.state.ui.panX || 0;
+		const panY = window.TablePlanner.state.ui.panY || 0;
+
+		// Convert screen coordinates to canvas coordinates
+		const canvasX = (clientX - canvasRect.left) / zoom;
+		const canvasY = (clientY - canvasRect.top) / zoom;
+
+		// Find seat elements
+		const seats = document.querySelectorAll('.seat');
+
+		for (const seat of seats) {
+			const seatRect = seat.getBoundingClientRect();
+			const seatCenterX = seatRect.left + seatRect.width / 2;
+			const seatCenterY = seatRect.top + seatRect.height / 2;
+
+			// Convert seat position to canvas coordinates
+			const seatCanvasX = (seatCenterX - canvasRect.left) / zoom;
+			const seatCanvasY = (seatCenterY - canvasRect.top) / zoom;
+
+			// Check if cursor is within seat bounds (with some tolerance)
+			const tolerance = 20; // pixels
+			const dx = Math.abs(canvasX - seatCanvasX);
+			const dy = Math.abs(canvasY - seatCanvasY);
+
+			if (dx <= tolerance && dy <= tolerance) {
+				return seat;
+			}
+		}
+
+		return null;
 	}
 
 	function openSeatPopover(seatNode, clientX, clientY) {

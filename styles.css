@@ -374,6 +374,39 @@ body {
 	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
 }
 
+/* Disable hover animations during seat drag */
+.canvas.seat-dragging .seat:hover {
+	width: 36px;
+	height: 36px;
+	font-size: 14px;
+	z-index: 10;
+	box-shadow: none;
+}
+
+.canvas.seat-dragging .seat:hover .seat-picture {
+	border-radius: 50%;
+}
+
+.canvas.seat-dragging .seat:hover .seat-name-label {
+	opacity: 0;
+}
+
+/* Seat drag preview styling */
+.seat-drag-preview {
+	width: 36px !important;
+	height: 36px !important;
+	font-size: 14px !important;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+	border: 2px solid #607d8b !important;
+	transition: none !important;
+}
+
+/* Enhanced drop target styling for seat drag */
+.seat.seat-drop-target {
+	box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.6) !important;
+	background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
 /* Resize handles */
 .handle-e,
 .handle-s {
