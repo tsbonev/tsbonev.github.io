@@ -1,0 +1,183 @@
+### High-level goals
+- Let you create/place “tables” on a canvas, each with an id and seat count.
+- Each table renders its seats as clickable circles around it.
+- Click a seat to assign a guest from a sidebar list (sortable by unassigned/assigned).
+- Each guest has a color (selectable via dropdown) which colors their seat.
+- Move and resize a table (keeping seat count) via drag and handles.
+- Edit seat count per table (with guardrails).
+- Persist everything locally (localStorage) with export/import.
+
+### Core UI layout
+- Header toolbar
+  - Add Table
+  - Zoom in/out/reset (optional)
+  - Export / Import
+  - Undo/Redo (optional)
+- Main content split
+  - Left: Canvas stage (absolute-positioned layer inside a scrollable container)
+  - Right: Sidebar
+    - Guest controls: add guest (name + color)
+    - Sort/filter: Unassigned first, Assigned first, By name; filter: Unassigned only
+    - Guest list: each row shows name, color picker, assigned table/seat (if any), quick actions (assign, unassign)
+- Footer (optional): status (selected table id, seat count), hints.
+
+### Data model (in-memory + persisted to localStorage)
+{
+  "version": 1,
+  "guests": [
+    { "id": "g_1", "name": "Alice", "color": "#E57373" }
+  ],
+  "tables": [
+    {
+      "id": "t_1",
+      "label": "1",
+      "x": 300,
+      "y": 220,
+      "radius": 70,
+      "seats": 8,
+      "assignments": {
+        "0": "g_1"
+      }
+    }
+  ],
+  "ui": {
+    "selectedTableId": "t_1",
+    "zoom": 1
+  }
+}
+- Tables keep:
+  - label (display id, editable), x,y center, radius (for sizing), seats count.
+  - assignments maps 0..seats-1 to guestId.
+- Guests keep:
+  - name, color.
+- Persistence key: tablePlanner:v1.
+- Autosave on any change (debounced ~250ms). Include Export (download JSON), Import (upload JSON + validate).
+
+### Rendering
+- Canvas: HTML <div> container with absolutely positioned, styled elements, or <canvas> for performance. For simplicity and easy hit-testing, prefer DOM elements:
+  - Each table: a circular <div> (border, background). Resize handles at N/E/S/W.
+  - Seats: child circular <button> or <div> absolutely positioned around the table.
+  - Selected table: highlight ring and show handles.
+- Seat positions: evenly spaced on a ring.
+  - angleStep = 2π / seats
+  - angle = startAngle + seatIndex * angleStep (startAngle = -π/2 so first seat is top)
+  - seatX = x + (radius + seatRingOffset) * cos(angle)
+  - seatY = y + (radius + seatRingOffset) * sin(angle)
+  - On resize, update radius; seat count unchanged; recompute positions.
+- Seat color: if assigned, background = guest.color; else neutral gray. Tooltip/title shows guest name.
+
+### Interactions
+- Add table: creates at center with default seats=8, radius=70, auto label (next integer).
+- Select table: click table body. Deselect by clicking empty canvas or sidebar.
+- Move table: drag on table body to update x,y (with snap-to-grid option).
+- Resize table: drag a visible handle; radius changes; min/max radius (e.g., 40..160).
+- Edit seats (count)
+  - Control in sidebar when a table is selected.
+  - Increasing: append seats; empty assignments for new indices.
+  - Decreasing: if any removed indices have assignments, confirm and unassign those guests (or block until reassigned).
+- Assign guest to seat:
+  - Click seat: opens small popover with:
+    - Assign dropdown (searchable list of unassigned guests)
+    - Unassign button (if occupied)
+  - Or drag guest from sidebar onto a seat (optional).
+- Unassign: from seat popover or guest row in sidebar.
+- Change guest color: color input in guest row updates seat color live.
+- Drag-select table + seats:
+  - Simple version: selecting a table implicitly “selects” all its seats; moving table moves its seats.
+  - Box select (optional): draw a rectangle to select a table; if multiple tables overlap, pick topmost under cursor.
+- Keyboard shortcuts (optional):
+  - Delete table (Del)
+  - Nudge move with arrows
+  - Escape to cancel selection
+
+### Sidebar guest list
+- Controls:
+  - Add guest: name (required), color (default random pleasant color).
+  - Sort dropdown: Unassigned first (default), Assigned first, Name A→Z.
+  - Filter toggle: Show unassigned only.
+- Guest rows:
+  - Name (editable inline)
+  - Color input
+  - Status: “Unassigned” or “Table 3 Seat 5”
+  - Actions: Unassign (if assigned)
+- Assignment derivation:
+  - Compute guest assignment by scanning tables’ assignments map.
+
+### State management
+- Single state object in module scope.
+- Mutations are funneled through small action functions:
+  - addTable, updateTablePosition, updateTableRadius, setTableSeats
+  - addGuest, updateGuest, unassignGuest, assignGuestToSeat
+- After each mutation: save() and render() (render diffing optional; can re-render all for v1).
+- Use a simple event bus or function calls to keep modules decoupled.
+
+### Validation and guardrails
+- Seat count: 1..32 (configurable).
+- Table label uniqueness: auto-increment, allow edit but prevent duplicates (or auto-fix).
+- Prevent overlapping extreme drag beyond canvas bounds (clamp).
+- On seat count decrease, prompt if data loss.
+
+### Files and responsibilities
+- index.html: layout skeleton, sidebar, canvas container, templates, modals.
+- styles.css: layout, table/seat visuals, selections, popovers.
+- app.js: bootstrap; loads state from localStorage; wires listeners; orchestrates render.
+- state.js: in-memory state, actions/mutations, persistence (load/save/export/import), id generators.
+- render.js: DOM construction/update for canvas and sidebar; seat layout math.
+- interactions.js: drag/move/resize, seat popovers, sidebar events, sorting/filtering.
+
+### Minimal schemas and helpers
+- ID generators:
+function nextId(prefix, counter) { return `${prefix}_${counter++}`; }
+- Persistence:
+const STORAGE_KEY = 'tablePlanner:v1';
+function load() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return defaultState();
+  try { return migrate(JSON.parse(raw)); } catch { return defaultState(); }
+}
+function save(state) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+### Milestones
+1. Skeleton UI + data model + localStorage load/save
+2. Render tables + seats with correct positions
+3. Select/move/resize table
+4. Sidebar guest list with sort/filter; add/edit guest
+5. Seat assign/unassign popover + coloring
+6. Edit seat count with safety checks
+7. Export/import JSON
+8. Polishing: snapping, keyboard, zoom (optional)
+
+### Edge cases to handle
+- Reducing seats below assigned seats → confirm/unassign those beyond new max index
+- Moving/resizing while zoomed (if added) → transform coordinates consistently
+- Ensuring seat positions don’t overlap at small radii → clamp min radius or increase seatRingOffset dynamically
+- Maintaining assignments on seat-count changes (preserve indices when possible)
+
+### Basic visual styling (suggestions)
+- Tables: light fill, solid border, drop shadow on hover/drag, selected glow
+- Seats: 16–22px diameter, border for contrast, assigned seats show guest color fill
+- Accessibility: tooltips with guest names, focusable elements, keyboard navigation for seat popover
+
+### Milestones (additional)
+
+Required to meet original plan
+- Edit table label and ensure uniqueness
+- Clamp moves within canvas bounds
+- Prompt when deleting a table with assigned guests
+
+Nice-to-have UX
+- Drag guest from sidebar onto a seat
+- Searchable dropdown in the seat popover
+- Keyboard shortcuts: Enter to assign, Esc to close
+- Visual overlap hints or simple collision avoidance
+- Grid visuals controls (density, show/hide)
+
+Tools/Maintenance
+- Undo/redo for mutations (move/resize/assign/seat count)
+- Zoom in/out/reset with consistent transforms
+- Guest delete (unassign if seated)
+- Stronger import validation and versioned migrations
+
+Export/Publish
+- Export image/PDF of the canvas
+- Shareable link (serialize state to URL or external bin)

@@ -1,0 +1,323 @@
+(function(){
+	function bootstrap(){
+		const { render, addTableCircle, addTableRect, addSeparator, state, setLanguage } = window.TablePlanner;
+		document.getElementById('addCircleTableBtn').addEventListener('click', addTableCircle);
+		document.getElementById('addRectTableBtn').addEventListener('click', addTableRect);
+		document.getElementById('addSeparatorBtn').addEventListener('click', addSeparator);
+		document.getElementById('undoBtn').addEventListener('click', ()=>window.TablePlanner.undo());
+		document.getElementById('redoBtn').addEventListener('click', ()=>window.TablePlanner.redo());
+		document.getElementById('exportBtn').addEventListener('click', onExport);
+		document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importInput').click());
+		document.getElementById('importInput').addEventListener('change', onImport);
+
+		document.getElementById('exportGuestsCsvBtn').addEventListener('click', onExportGuestsCsv);
+		document.getElementById('importGuestsCsvBtn').addEventListener('click', ()=> document.getElementById('importGuestsCsvInput').click());
+		document.getElementById('importGuestsCsvInput').addEventListener('change', onImportGuestsCsv);
+
+		// Language toggle
+		document.getElementById('languageBtn').addEventListener('click', () => {
+			const currentLang = state.ui.language || 'en';
+			const newLang = currentLang === 'en' ? 'bg' : 'en';
+			setLanguage(newLang);
+			window.i18n.updateUI();
+			document.getElementById('languageBtn').textContent = newLang === 'bg' ? '🇺🇸' : '🇧🇬';
+		});
+
+		const guestForm = document.getElementById('guestForm');
+		guestForm.addEventListener('submit', onGuestAdd);
+		document.getElementById('guestSortSelect').addEventListener('change', onGuestSort);
+		document.getElementById('guestUnassignedOnly').addEventListener('change', onGuestFilter);
+		const guestList = document.getElementById('guestList');
+		guestList.addEventListener('change', onGuestListChange);
+		guestList.addEventListener('click', onGuestListClick);
+
+		document.getElementById('applySeatCountBtn').addEventListener('click', onApplySeatCount);
+
+		// rect controls
+		document.getElementById('oneSidedToggle').addEventListener('change', onOneSidedToggle);
+		document.getElementById('oneSideGroup').addEventListener('change', onOneSideChange);
+		document.getElementById('oddExtraGroup').addEventListener('change', onOddExtraChange);
+
+		// snap and grid controls
+		const snapEl = document.getElementById('snapToggle');
+		snapEl.addEventListener('change', onSnapChange);
+		const gridEl = document.getElementById('gridSizeInput');
+		gridEl.addEventListener('change', onGridChange);
+		const showGridEl = document.getElementById('showGridToggle');
+		showGridEl.addEventListener('change', onShowGridChange);
+
+		document.addEventListener('keydown', onGlobalKeydown);
+
+		// Expose helpers for render()
+		window.updateCounts = updateCounts;
+		window.updateControlsVisibility = updateControlsVisibility;
+
+		// Initial UI sync then render
+		syncGridControls();
+		window.i18n.updateUI(); // Apply translations
+		window.TablePlanner.render();
+		updateCounts();
+		updateControlsVisibility();
+		requestAnimationFrame(()=>{
+			window.TablePlanner.render();
+			updateCounts();
+			updateControlsVisibility();
+		});
+	}
+
+	function updateCounts(){
+		const s = window.TablePlanner.state;
+		const actualTables = s.tables.filter(t => t.type === 'rect' || t.type === 'circle');
+		const tables = actualTables.length;
+		const guests = s.guests.length;
+		let assigned = 0;
+		for(const t of actualTables){ for(const k in (t.assignments||{})){ if(t.assignments[k]) assigned++; } }
+		const unassigned = guests - new Set(actualTables.flatMap(t=>Object.values(t.assignments||{}))).size;
+		
+		// Calculate total seats
+		const totalSeats = actualTables.reduce((sum, t) => sum + (t.seats || 0), 0);
+		
+		const tableCount = document.getElementById('tableCount');
+		if(tableCount) tableCount.textContent = window.i18n.t('tableCount', { count: tables });
+		const seatCount = document.getElementById('seatCount');
+		if(seatCount) seatCount.textContent = `| ${window.i18n.t('seatCount', { count: totalSeats })}`;
+		const guestCounts = document.getElementById('guestCounts');
+		if(guestCounts) guestCounts.textContent = window.i18n.t('guestCounts', { total: guests, assigned, unassigned });
+	}
+
+	function updateControlsVisibility(){
+		const s = window.TablePlanner.state;
+		const t = s.tables.find(t=>t.id===s.ui.selectedTableId);
+		const tableControls = document.getElementById('tableControls');
+		const rectControls = document.getElementById('rectControls');
+		const oneSideGroup = document.getElementById('oneSideGroup');
+		const oddExtraGroup = document.getElementById('oddExtraGroup');
+		if(!t || t.type === 'separator'){
+			if(tableControls) tableControls.style.display = 'none';
+			return;
+		}
+		if(tableControls) tableControls.style.display = '';
+		if(rectControls) rectControls.style.display = (t.type==='rect') ? '' : 'none';
+		if(oneSideGroup) oneSideGroup.style.display = (t.type==='rect' && t.rectOneSided) ? '' : 'none';
+		const sides = t.type==='rect' ? (t.rectOneSided ? [t.oneSide] : computeRectSeatSides(t)) : [];
+		const twoSided = t.type==='rect' && !t.rectOneSided && sides.length===2;
+		const isOdd = t && (t.seats % 2)===1;
+		if(oddExtraGroup) oddExtraGroup.style.display = (twoSided && isOdd) ? '' : 'none';
+	}
+
+	function computeRectSeatSides(table){
+		const useAllSides = (Math.max(table.width, table.height)/Math.min(table.width, table.height)) <= 1.05;
+		const longerIsHorizontal = table.width >= table.height;
+		return table.rectOneSided ? [table.oneSide] : (useAllSides ? ['top','right','bottom','left'] : (longerIsHorizontal ? ['top','bottom'] : ['left','right']));
+	}
+
+	// expose updateControlsVisibility for render()
+	window.updateControlsVisibility = updateControlsVisibility;
+
+	function validateImport(obj){
+		if(!obj || typeof obj !== 'object') return 'Root must be an object';
+		if(!Array.isArray(obj.tables) || !Array.isArray(obj.guests)) return 'Missing tables or guests arrays';
+		for(const t of obj.tables){
+			if(typeof t !== 'object') return 'Invalid table entry';
+			if(!t.id) return 'Table missing id';
+			if(t.type === 'separator'){
+				if(!Number.isFinite(t.x) || !Number.isFinite(t.y) || !Number.isFinite(t.width) || !Number.isFinite(t.height)) return 'Invalid separator geometry';
+			}else if(t.type === 'circle'){
+				if(!t.label) return 'Circle table missing label';
+				if(!Number.isFinite(t.x) || !Number.isFinite(t.y) || !Number.isFinite(t.radius)) return 'Invalid circle table geometry';
+				if(!Number.isFinite(t.seats) || t.seats < 1 || t.seats > 64) return 'Invalid seats count';
+			}else if(t.type === 'rect'){
+				if(!t.label) return 'Rect table missing label';
+				if(!Number.isFinite(t.x) || !Number.isFinite(t.y) || !Number.isFinite(t.width) || !Number.isFinite(t.height)) return 'Invalid rect table geometry';
+				if(!Number.isFinite(t.seats) || t.seats < 1 || t.seats > 64) return 'Invalid seats count';
+			}else{
+				return 'Unknown table type';
+			}
+		}
+		for(const g of obj.guests){
+			if(typeof g !== 'object' || !g.id || typeof g.name !== 'string') return 'Invalid guest entry';
+		}
+		return null;
+	}
+
+	function onGlobalKeydown(e){
+		if(!window.TablePlanner || !window.TablePlanner.undo) return;
+		if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){
+			e.preventDefault();
+			window.TablePlanner.undo();
+			updateCounts();
+		}else if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){
+			e.preventDefault();
+			window.TablePlanner.redo();
+			updateCounts();
+		}
+	}
+
+	function onSnapChange(e){ window.TablePlanner.setSnap(e.target.checked); }
+	function onGridChange(e){ 
+		if(window.TablePlanner && window.TablePlanner.setGridSize) {
+			window.TablePlanner.setGridSize(Number(e.target.value)); 
+			window.TablePlanner.render(); 
+		}
+	}
+
+	function onOneSidedToggle(e){
+		const sel = window.TablePlanner.state.ui.selectedTableId;
+		if(!sel) return;
+		window.TablePlanner.setRectOneSided(sel, e.target.checked);
+	}
+	function onOneSideChange(e){
+		if(e.target.name !== 'oneSide') return;
+		const sel = window.TablePlanner.state.ui.selectedTableId;
+		if(!sel) return;
+		window.TablePlanner.setRectOneSide(sel, e.target.value);
+	}
+	function onOddExtraChange(e){
+		if(e.target.name !== 'oddExtraSide') return;
+		const sel = window.TablePlanner.state.ui.selectedTableId;
+		if(!sel) return;
+		window.TablePlanner.setRectOddExtraSide(sel, e.target.value);
+	}
+
+	function onGuestAdd(e){
+		e.preventDefault();
+		const name = document.getElementById('guestNameInput').value;
+		const color = document.getElementById('guestColorInput').value;
+		if(!name.trim()) return;
+		window.TablePlanner.addGuest(name, color);
+		document.getElementById('guestNameInput').value = '';
+		updateCounts();
+	}
+	function onGuestSort(e){ window.TablePlanner.setGuestSort(e.target.value); }
+	function onGuestFilter(e){ window.TablePlanner.setGuestUnassignedOnly(e.target.checked); }
+
+	function onGuestListChange(e){
+		const role = e.target.dataset.role;
+		const row = e.target.closest('.guest-row');
+		if(!row) return;
+		const id = row.dataset.id;
+		if(role === 'name'){
+			window.TablePlanner.updateGuest(id, { name: e.target.value });
+		}else if(role === 'color'){
+			window.TablePlanner.updateGuest(id, { color: e.target.value });
+		}
+	}
+
+	function onGuestListClick(e){
+		const btn = e.target.closest('[data-role="delete-guest"]');
+		if(!btn) return;
+		const row = btn.closest('.guest-row');
+		if(!row) return;
+		const id = row.dataset.id;
+		const ok = window.confirm('Delete this guest and unassign from any seat?');
+		if(!ok) return;
+		window.TablePlanner.deleteGuest(id);
+		updateCounts();
+	}
+
+	function onApplySeatCount(){
+		const input = document.getElementById('seatCountInput');
+		const value = Number(input.value);
+		const sel = window.TablePlanner.state.ui.selectedTableId;
+		if(!sel) return;
+		if(!Number.isFinite(value)) return;
+		window.TablePlanner.setTableSeats(sel, value);
+		updateCounts();
+	}
+
+	function syncGridControls(){
+		if(!window.TablePlanner || !window.TablePlanner.state) return;
+		const s = window.TablePlanner.state;
+		const snapEl = document.getElementById('snapToggle'); if(snapEl) snapEl.checked = !!s.ui.snap;
+		const gridEl = document.getElementById('gridSizeInput'); if(gridEl) gridEl.value = String(s.ui.grid || 64);
+		const showGridEl = document.getElementById('showGridToggle'); if(showGridEl) showGridEl.checked = s.ui.showGrid !== false;
+	}
+
+	function onShowGridChange(e){
+		window.TablePlanner.state.ui.showGrid = !!e.target.checked;
+		window.TablePlanner.save();
+		window.TablePlanner.render();
+	}
+
+	function onExport(){
+		const data = JSON.stringify(window.TablePlanner.state, null, 2);
+		const blob = new Blob([data], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		const ts = new Date().toISOString().replace(/[:.]/g,'-');
+		a.download = `table-planner-${ts}.json`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
+	function onImport(e){
+		const file = e.target.files && e.target.files[0];
+		if(!file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			try{
+				const obj = JSON.parse(String(reader.result));
+				const err = validateImport(obj);
+				if(err){ alert('Import failed: ' + err); return; }
+				window.TablePlanner.state.version = obj.version || 1;
+				window.TablePlanner.state.guests = Array.isArray(obj.guests) ? obj.guests : [];
+				window.TablePlanner.state.tables = Array.isArray(obj.tables) ? obj.tables : [];
+				window.TablePlanner.state.ui = Object.assign({ selectedTableId: null, zoom: 1, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 12, showGrid: true }, obj.ui || {});
+				window.TablePlanner.save();
+				syncGridControls();
+				window.TablePlanner.render();
+				updateCounts();
+				if(window.updateControlsVisibility) window.updateControlsVisibility();
+			}catch(err){
+				alert('Import failed: invalid JSON');
+			}
+		};
+		reader.readAsText(file);
+		// reset so selecting the same file again will fire change
+		e.target.value = '';
+	}
+
+	function onExportGuestsCsv(){
+		const rows = window.TablePlanner.state.guests.map(g=>g.name.replace(/"/g,'""'));
+		const csv = 'name\n' + rows.map(n=>`"${n}"`).join('\n');
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'guests.csv';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
+	function onImportGuestsCsv(e){
+		const file = e.target.files && e.target.files[0];
+		if(!file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			try{
+				const text = String(reader.result);
+				const lines = text.split(/\r?\n/).filter(Boolean);
+				let start = 0;
+				if(lines[0] && /name/i.test(lines[0])) start = 1;
+				for(let i=start;i<lines.length;i++){
+					const raw = lines[i];
+					const name = raw.replace(/^\s*"?|"?\s*$/g,'').replace(/""/g,'"');
+					if(name) window.TablePlanner.addGuest(name, '#6aa9ff');
+				}
+				updateCounts();
+			}catch(err){
+				alert(window.i18n.t('importGuestsFailed'));
+			}
+			// reset input
+			e.target.value = '';
+		};
+		reader.readAsText(file);
+	}
+
+	document.addEventListener('DOMContentLoaded', bootstrap);
+})();

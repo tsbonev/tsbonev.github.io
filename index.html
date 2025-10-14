@@ -1,83 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="jquery-3.5.0.min.js"></script>
-    <script src="Chart.bundle.min.js"></script>
-
-    
-    <link rel="stylesheet" href="bootstrap.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/png" href="img/path_default.png"/>
-
-    <title>Paths of Coulerain</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Table Planner</title>
+	<link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
-    <div class="container">
-        <canvas id="myChart"></canvas>
-    </div>
-
-    <div class="container" id="path_card_container">
-        <div id="path_card" class="card" >
-            <img class="card-img-top text-center mx-auto" id="path_image" src="" alt="Path Image">
-            <div class="card-body">
-              <h3 class="card-title text-center bold" id="path_category">ABC</h3>
-              <h5 class="card-title text-center" id="path_name"></h5>
-              <p id="path_content">
-                --- Prince of Paths - A being controlling the sanctioning of new paths <br>
-
-                -|- Pathmaker - Reserved for the one who carved out the path <br>
-                
-                -*- Ruler - The current ruler of the path <br>
-                
-                -0- Aspect - The domain of the path <br>
-                
-                -'- Champion - An ascended in service of the path <br>
-                
-                -X- Opposer - An ascended in opposition of the path's ruler <br>
-                
-                -~- Army - Ascended beings in service of the path as a whole <br>
-                
-                -^- Priests - Non-ascended beings in service of the path as a whole <br>
-                
-                -=- Servant - A non-ascended in service of the path <br>
-            </p>
-            </div>
-          </div>
-    </div>
-
-    <div class="container">
-          <div id="path_ranks" class="card" >
-            <div class="card-body">
-              <h5 class="card-title text-center">Path Ranks</h5>
-              <p>
-                --- Prince of Paths - A being controlling the sanctioning of new paths <br>
-
-                -|- Pathmaker - Reserved for the one who carved out the path <br>
-                
-                -*- Ruler - The current ruler of the path <br>
-                
-                -0- Aspect - The domain of the path <br>
-                
-                -'- Champion - An ascended in service of the path <br>
-                
-                -X- Opposer - An ascended in opposition of the path's ruler <br>
-                
-                -~- Army - Ascended beings in service of the path as a whole <br>
-                
-                -^- Priests - Non-ascended beings in service of the path as a whole <br>
-                
-                -=- Servant - A non-ascended in service of the path <br>
-            </p>
-            </div>
-          </div>
-    </div>
-
-    <script src="paths.json"></script>
-    <script type="text/javascript" src="script.js"></script>
+	<header class="toolbar">
+		<div class="left">
+			<div id="tableCount" class="count-pill" data-i18n="tableCount"></div>
+			<div id="seatCount" class="count-pill" data-i18n="seatCount">| Seats: 0</div>
+			<button id="addCircleTableBtn" data-i18n="addCircleTableBtn">Add Circle</button>
+			<button id="addRectTableBtn" data-i18n="addRectTableBtn">Add Rectangle</button>
+			<button id="addSeparatorBtn" data-i18n="addSeparatorBtn">Add Separator</button>
+		</div>
+		<div class="center">
+			<label class="snap">
+				<input type="checkbox" id="snapToggle" />
+				<span data-i18n="snapToggle">Snap</span>
+			</label>
+			<label class="grid-size">
+				<span data-i18n="gridSizeInput">Grid</span>
+				<input type="number" id="gridSizeInput" min="4" max="64" step="1" value="12" />
+			</label>
+			<label class="show-grid">
+				<input type="checkbox" id="showGridToggle" checked />
+				<span data-i18n="showGridToggle">Show Grid</span>
+			</label>
+		</div>
+		<div class="right">
+			<button id="undoBtn" data-i18n="undoBtn">Undo</button>
+			<button id="redoBtn" data-i18n="redoBtn">Redo</button>
+			<button id="exportBtn" data-i18n="exportBtn">Export Plan</button>
+			<button id="importBtn" type="button" data-i18n="importBtn">Import Plan</button>
+			<input type="file" id="importInput" accept="application/json" style="display:none" />
+			<button id="languageBtn" type="button">🇧🇬</button>
+		</div>
+	</header>
+	<main class="layout">
+		<section class="canvas-wrap">
+			<div id="canvas" class="canvas" tabindex="0"></div>
+		</section>
+		<aside id="sidebar" class="sidebar">
+			<h2><span data-i18n="guestsTitle">Guests</span> <span id="guestCounts" class="count-pill"></span></h2>
+			<div class="guest-csv">
+				<button id="exportGuestsCsvBtn" type="button" data-i18n="exportGuestsCsvBtn">Export Guests CSV</button>
+				<button id="importGuestsCsvBtn" type="button" data-i18n="importGuestsCsvBtn">Import Guests CSV</button>
+				<input id="importGuestsCsvInput" type="file" accept="text/csv" style="display:none" />
+			</div>
+			<form id="guestForm" class="guest-form">
+				<input id="guestNameInput" type="text" data-i18n="guestNameInput" placeholder="Guest name" required />
+				<input id="guestColorInput" type="color" value="#6aa9ff" />
+				<button type="submit" data-i18n="guestFormSubmit">Add</button>
+			</form>
+			<div class="guest-controls">
+				<label><span data-i18n="guestSortLabel">Sort:</span>
+					<select id="guestSortSelect">
+						<option value="unassignedFirst" data-i18n="guestSortUnassignedFirst">Unassigned first</option>
+						<option value="assignedFirst" data-i18n="guestSortAssignedFirst">Assigned first</option>
+						<option value="name" data-i18n="guestSortName">Name A–Z</option>
+					</select>
+				</label>
+				<label class="filter">
+					<input id="guestUnassignedOnly" type="checkbox" />
+					<span data-i18n="guestUnassignedOnly">Unassigned only</span>
+				</label>
+			</div>
+			<div class="selected-info" id="selectedInfo"></div>
+			<div id="tableControls" class="table-controls" style="display:none">
+				<h3 data-i18n="tableControlsTitle">Selected Table</h3>
+				<label><span data-i18n="seatCountLabel">Seats:</span>
+					<input id="seatCountInput" type="number" min="1" max="32" step="1" />
+					<button id="applySeatCountBtn" type="button" data-i18n="applySeatCountBtn">Apply</button>
+				</label>
+				<div id="rectControls" class="rect-controls" style="display:none">
+					<label><input type="checkbox" id="oneSidedToggle" /> <span data-i18n="oneSidedToggle">One-sided (rect only)</span></label>
+					<div class="side-group" id="oneSideGroup" style="display:none">
+						<div data-i18n="seatSideLabel">Seat side:</div>
+						<label><input type="radio" name="oneSide" value="top" /> <span data-i18n="sideTop">Top</span></label>
+						<label><input type="radio" name="oneSide" value="right" /> <span data-i18n="sideRight">Right</span></label>
+						<label><input type="radio" name="oneSide" value="bottom" /> <span data-i18n="sideBottom">Bottom</span></label>
+						<label><input type="radio" name="oneSide" value="left" /> <span data-i18n="sideLeft">Left</span></label>
+					</div>
+					<div class="side-group" id="oddExtraGroup" style="display:none">
+						<div data-i18n="oddExtraSeatLabel">Odd extra seat to:</div>
+						<label><input type="radio" name="oddExtraSide" value="top" /> <span data-i18n="sideTop">Top</span></label>
+						<label><input type="radio" name="oddExtraSide" value="right" /> <span data-i18n="sideRight">Right</span></label>
+						<label><input type="radio" name="oddExtraSide" value="bottom" /> <span data-i18n="sideBottom">Bottom</span></label>
+						<label><input type="radio" name="oddExtraSide" value="left" /> <span data-i18n="sideLeft">Left</span></label>
+					</div>
+				</div>
+			</div>
+			<div id="guestList" class="guest-list"></div>
+		</aside>
+	</main>
+	<script src="i18n.js"></script>
+	<script src="state.js"></script>
+	<script src="render.js"></script>
+	<script src="interactions.js"></script>
+	<script src="app.js"></script>
 </body>
-
 </html>
