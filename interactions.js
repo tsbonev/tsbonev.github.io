@@ -410,7 +410,6 @@
 		for (const table of state.tables) {
 			const bounds = getTableBounds(table);
 			const intersects = isTableInSelectionRect(table, rect);
-			console.log(`Table ${table.id} (${table.type}): bounds=${JSON.stringify(bounds)}, intersects=${intersects}`);
 			if (intersects) {
 				selectedIds.push(table.id);
 			}
@@ -661,6 +660,21 @@
 					picture.src = item.guest.picture;
 					picture.alt = item.guest.name;
 					picture.title = item.guest.name;
+
+					// Handle image loading errors (e.g., invalid blob URLs after reload)
+					picture.addEventListener('error', () => {
+						console.warn(`Failed to load picture for ${item.guest.name}, falling back to initials`);
+						// Remove the failed image and show initials instead
+						picture.remove();
+						const initials = document.createElement('div');
+						initials.className = 'table-guest-initials';
+						initials.textContent = getInitials(item.guest.name);
+						initials.style.backgroundColor = item.guest.color || '#6aa9ff';
+						pictureContainer.appendChild(initials);
+						// Clear the invalid picture URL from the guest
+						window.TablePlanner.updateGuest(item.guest.id, { picture: null });
+					});
+
 					pictureContainer.appendChild(picture);
 				} else {
 					const initials = document.createElement('div');

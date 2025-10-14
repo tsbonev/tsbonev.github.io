@@ -91,6 +91,18 @@
 			const st = migrate(parsed);
 			// ensure in-memory history exists
 			if (!st._history) st._history = { past: [], future: [], suppress: false };
+
+			// Clear picture URLs on load since folderHandle can't be persisted
+			// This prevents blob URL errors after page reload
+			if (st.pictures && st.pictures.folderHandle === null) {
+				for (const guest of st.guests) {
+					if (guest.picture && guest.picture.startsWith('blob:')) {
+						guest.picture = null;
+					}
+				}
+				st.pictures.imageCache = {};
+			}
+
 			return st;
 		} catch (e) {
 			return defaultState();
@@ -303,8 +315,6 @@
 		const t = state.tables.find(t => t.id === id);
 		if (!t || (t.type !== 'rect' && t.type !== 'separator')) return;
 
-		console.log('updateTableSize called for:', id, 'type:', t.type, 'new size:', width, 'x', height);
-
 		if (t.type === 'separator') {
 			t.width = Math.max(40, Math.min(600, width));   // Smaller min width for separators
 			t.height = Math.max(10, Math.min(600, height)); // Smaller min height for separators
@@ -372,9 +382,7 @@
 
 	// Picture management functions
 	function normalizeName(name) {
-		console.log(`normalizeName input: "${name}"`);
 		const step1 = name.toLowerCase();
-		console.log(`  step1 (toLowerCase): "${step1}"`);
 		const result = step1.replace(/[\s\-_]+/g, '_');
 		return result;
 	}
@@ -418,10 +426,6 @@
 					files.push({ name: name.replace(/\.png$/i, ''), handle });
 				}
 			}
-
-			console.log('=== PICTURE SCANNING DEBUG ===');
-			console.log('Found PNG files:', files.map(f => f.name));
-
 			// First, clear all existing pictures to ensure clean state
 			for (const guest of state.guests) {
 				if (guest.picture) {
@@ -433,30 +437,20 @@
 				}
 			}
 
-			console.log('Guest names:', state.guests.map(g => g.name));
-
 			// Match files to guests - only assign if there's an exact match
 			const matches = [];
 			for (const guest of state.guests) {
 				const normalizedGuestName = normalizeName(guest.name);
-				console.log(`Guest "${guest.name}" -> normalized: "${normalizedGuestName}"`);
 
 				for (const file of files) {
 					const normalizedFileName = normalizeName(file.name);
-					console.log(`  File "${file.name}" -> normalized: "${normalizedFileName}"`);
 
 					if (normalizedGuestName === normalizedFileName && normalizedGuestName.length > 0) {
-						console.log(`  ✅ MATCH FOUND: "${guest.name}" <-> "${file.name}"`);
 						matches.push({ guest, file });
 						break; // Take first match
-					} else {
-						console.log(`  ❌ No match`);
 					}
 				}
 			}
-
-			console.log(`Total matches found: ${matches.length}`);
-			console.log('=== END DEBUG ===');
 
 			// Assign pictures to guests only for exact matches
 			for (const { guest, file } of matches) {

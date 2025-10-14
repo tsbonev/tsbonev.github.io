@@ -123,6 +123,17 @@
 				picture.src = g.picture;
 				picture.alt = g.name;
 				picture.title = ''; // Remove tooltip
+
+				// Handle image loading errors (e.g., invalid blob URLs after reload)
+				picture.addEventListener('error', () => {
+					console.warn(`Failed to load picture for ${g.name}, falling back to initials`);
+					// Remove the failed image and show initials instead
+					picture.remove();
+					seatEl.textContent = getInitials(g.name);
+					// Clear the invalid picture URL from the guest
+					window.TablePlanner.updateGuest(g.id, { picture: null });
+				});
+
 				seatEl.appendChild(picture);
 			} else {
 				seatEl.textContent = getInitials(g.name);
@@ -185,6 +196,21 @@
 				picture.src = g.picture;
 				picture.alt = g.name;
 				picture.title = g.name;
+
+				// Handle image loading errors (e.g., invalid blob URLs after reload)
+				picture.addEventListener('error', () => {
+					console.warn(`Failed to load picture for ${g.name}, falling back to initials`);
+					// Remove the failed image and show initials instead
+					picture.remove();
+					const initials = document.createElement('div');
+					initials.className = 'guest-initials';
+					initials.textContent = getInitials(g.name);
+					initials.style.backgroundColor = g.color || '#6aa9ff';
+					pictureContainer.appendChild(initials);
+					// Clear the invalid picture URL from the guest
+					window.TablePlanner.updateGuest(g.id, { picture: null });
+				});
+
 				pictureContainer.appendChild(picture);
 			} else {
 				const initials = document.createElement('div');
