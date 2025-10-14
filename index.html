@@ -45,13 +45,12 @@
 		<section class="canvas-wrap">
 			<div id="canvas" class="canvas" tabindex="0"></div>
 		</section>
-		<button id="sidebarToggle" class="sidebar-toggle" title="Toggle Sidebar">‹</button>
+		<button id="sidebarToggle" class="sidebar-toggle" data-i18n-attr="title:toggleSidebar">‹</button>
 		<aside id="sidebar" class="sidebar">
 			<h2><span data-i18n="guestsTitle">Guests</span> <span id="guestCounts" class="count-pill"></span></h2>
-			<div class="guest-csv">
-				<button id="exportGuestsCsvBtn" type="button" data-i18n="exportGuestsCsvBtn">Export Guests CSV</button>
-				<button id="importGuestsCsvBtn" type="button" data-i18n="importGuestsCsvBtn">Import Guests CSV</button>
-				<input id="importGuestsCsvInput" type="file" accept="text/csv" style="display:none" />
+			<div id="tableGuests" class="table-guests" style="display:none">
+				<h3 data-i18n="tableGuestsTitle">Table Guests</h3>
+				<div id="tableGuestsList" class="table-guests-list"></div>
 			</div>
 			<div class="guest-pictures">
 				<button id="selectPictureFolderBtn" type="button" data-i18n="selectPictureFolderBtn">Select Picture
@@ -59,6 +58,11 @@
 				<button id="scanPicturesBtn" type="button" data-i18n="scanPicturesBtn" style="display:none">Scan for
 					Pictures</button>
 				<div id="pictureFolderStatus" class="picture-folder-status" style="display:none"></div>
+			</div>
+			<div class="guest-csv">
+				<button id="exportGuestsCsvBtn" type="button" data-i18n="exportGuestsCsvBtn">Export Guests CSV</button>
+				<button id="importGuestsCsvBtn" type="button" data-i18n="importGuestsCsvBtn">Import Guests CSV</button>
+				<input id="importGuestsCsvInput" type="file" accept="text/csv" style="display:none" />
 			</div>
 			<form id="guestForm" class="guest-form">
 				<input id="guestNameInput" type="text" data-i18n="guestNameInput" placeholder="Guest name" required />
@@ -71,6 +75,7 @@
 						<option value="unassignedFirst" data-i18n="guestSortUnassignedFirst">Unassigned first</option>
 						<option value="assignedFirst" data-i18n="guestSortAssignedFirst">Assigned first</option>
 						<option value="name" data-i18n="guestSortName">Name A–Z</option>
+						<option value="color" data-i18n="guestSortColor">Color</option>
 					</select>
 				</label>
 				<label class="filter">
@@ -78,11 +83,10 @@
 					<span data-i18n="guestUnassignedOnly">Unassigned only</span>
 				</label>
 			</div>
-			<div class="selected-info" id="selectedInfo"></div>
-			<div id="tableGuests" class="table-guests" style="display:none">
-				<h3 data-i18n="tableGuestsTitle">Table Guests</h3>
-				<div id="tableGuestsList" class="table-guests-list"></div>
+			<div class="guest-search">
+				<input id="guestSearchInput" type="text" data-i18n="guestSearchInput" placeholder="Search guests..." />
 			</div>
+			<div class="selected-info" id="selectedInfo"></div>
 			<div id="tableControls" class="table-controls" style="display:none">
 				<h3 data-i18n="tableControlsTitle">Selected Table</h3>
 				<label><span data-i18n="seatCountLabel">Seats:</span>

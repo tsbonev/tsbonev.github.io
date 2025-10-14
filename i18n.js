@@ -25,9 +25,12 @@
 			'guestSortUnassignedFirst': 'Unassigned first',
 			'guestSortAssignedFirst': 'Assigned first',
 			'guestSortName': 'Name A–Z',
+			'guestSortColor': 'Color',
 			'guestUnassignedOnly': 'Unassigned only',
+			'guestSearchInput': 'Search guests...',
 			'selectedInfo': 'Selected:',
 			'tableControlsTitle': 'Selected Table',
+			'tableGuestsTitle': 'Table Guests',
 			'seatCountLabel': 'Seats:',
 			'applySeatCountBtn': 'Apply',
 			'oneSidedToggle': 'One-sided (rect only)',
@@ -50,6 +53,11 @@
 
 			// Messages
 			'deleteTableConfirm': 'Delete table "{label}" with {count} assigned guests?',
+			'deleteGuestConfirm': 'Delete this guest and unassign from any seat?',
+			'deleteMultipleTablesConfirm': 'Delete {count} selected table(s) with assigned guests?',
+			'reduceSeatsConfirm': 'Reducing seats to {seats} will unassign {count} guest(s). Continue?',
+			'importFailed': 'Import failed: {error}',
+			'importFailedInvalidJson': 'Import failed: invalid JSON',
 			'importGuestsFailed': 'Import guests failed: invalid CSV',
 			'pictureFolderNotSupported': 'Your browser does not support folder selection. Please use Chrome or Edge for this feature.',
 			'pictureFolderSelectFailed': 'Failed to select folder. Please try again.',
@@ -63,7 +71,11 @@
 			// Seat and status text
 			'seat': 'Seat',
 			'unassigned': 'Unassigned',
-			'table': 'Table'
+			'table': 'Table',
+			'tableTitle': 'Table {label}',
+			'separatorTitle': 'Separator',
+			'seatNumber': 'Seat {number}',
+			'toggleSidebar': 'Toggle Sidebar'
 		},
 		bg: {
 			// Toolbar
@@ -90,9 +102,12 @@
 			'guestSortUnassignedFirst': 'Неразпределени първи',
 			'guestSortAssignedFirst': 'Разпределени първи',
 			'guestSortName': 'Име А–Я',
+			'guestSortColor': 'Цвят',
 			'guestUnassignedOnly': 'Само неразпределени',
+			'guestSearchInput': 'Търси гости...',
 			'selectedInfo': 'Избрано:',
 			'tableControlsTitle': 'Избрана Маса',
+			'tableGuestsTitle': 'Гости на Масата',
 			'seatCountLabel': 'Места:',
 			'applySeatCountBtn': 'Приложи',
 			'oneSidedToggle': 'Едностранна (само правоъгълник)',
@@ -115,6 +130,11 @@
 
 			// Messages
 			'deleteTableConfirm': 'Изтрий маса "{label}" с {count} разпределени гости?',
+			'deleteGuestConfirm': 'Изтрий този гост и премахни от всяко място?',
+			'deleteMultipleTablesConfirm': 'Изтрий {count} избрани маси с разпределени гости?',
+			'reduceSeatsConfirm': 'Намаляването на местата до {seats} ще премахне {count} гост(а). Продължи?',
+			'importFailed': 'Импорт неуспешен: {error}',
+			'importFailedInvalidJson': 'Импорт неуспешен: невалиден JSON',
 			'importGuestsFailed': 'Импорт на гости неуспешен: невалиден CSV',
 			'pictureFolderNotSupported': 'Вашият браузър не поддържа избор на папка. Моля използвайте Chrome или Edge за тази функция.',
 			'pictureFolderSelectFailed': 'Неуспешен избор на папка. Моля опитайте отново.',
@@ -128,7 +148,11 @@
 			// Seat and status text
 			'seat': 'Място',
 			'unassigned': 'Неразпределен',
-			'table': 'Маса'
+			'table': 'Маса',
+			'tableTitle': 'Маса {label}',
+			'separatorTitle': 'Разделител',
+			'seatNumber': 'Място {number}',
+			'toggleSidebar': 'Превключи Страничната Лента'
 		}
 	};
 

@@ -5,6 +5,7 @@
 	let dragSelect = null;
 	let pan = null;
 	let seatDrag = null;
+	let seatDragDelay = null;
 
 	function intersects(a, b) {
 		if (a.type === 'circle' && b.type === 'circle') {
@@ -174,8 +175,8 @@
 			const guestId = table && table.assignments ? table.assignments[String(seatIndex)] : null;
 
 			if (guestId) {
-				// Start seat drag for assigned guest
-				startSeatDrag(seatNode, e.clientX, e.clientY, tableId, seatIndex, guestId);
+				// Start drag delay for assigned guest
+				startSeatDragDelay(seatNode, e.clientX, e.clientY, tableId, seatIndex, guestId);
 				e.preventDefault();
 				return;
 			} else {
@@ -272,7 +273,7 @@
 				}
 
 				if (hasAnyAssignments) {
-					const ok = window.confirm(`Delete ${selectedIds.length} selected table(s) with assigned guests?`);
+					const ok = window.confirm(window.i18n.t('deleteMultipleTablesConfirm', { count: selectedIds.length }));
 					if (!ok) return;
 				}
 
@@ -631,6 +632,64 @@
 		seats.forEach(seat => seat.classList.remove('seat-drop-target'));
 	}
 
+	function startSeatDragDelay(seatNode, clientX, clientY, tableId, seatIndex, guestId) {
+		// Clear any existing delay
+		if (seatDragDelay) {
+			clearTimeout(seatDragDelay.timeoutId);
+		}
+
+		// Add visual feedback that drag will start soon
+		seatNode.classList.add('seat-drag-pending');
+
+		seatDragDelay = {
+			seatNode,
+			tableId,
+			seatIndex,
+			guestId,
+			startX: clientX,
+			startY: clientY,
+			timeoutId: setTimeout(() => {
+				// Start actual drag after delay
+				seatNode.classList.remove('seat-drag-pending');
+				startSeatDrag(seatNode, clientX, clientY, tableId, seatIndex, guestId);
+				seatDragDelay = null;
+			}, 300) // 300ms delay
+		};
+
+		// Track mouse movement during delay
+		document.addEventListener('mousemove', onSeatDragDelayMove);
+		document.addEventListener('mouseup', onSeatDragDelayUp);
+	}
+
+	function onSeatDragDelayMove(e) {
+		if (!seatDragDelay) return;
+
+		// Check if mouse moved too far from initial position
+		const distance = Math.hypot(e.clientX - seatDragDelay.startX, e.clientY - seatDragDelay.startY);
+		if (distance > 5) { // 5 pixel threshold
+			// Cancel delay and start drag immediately
+			clearTimeout(seatDragDelay.timeoutId);
+			seatDragDelay.seatNode.classList.remove('seat-drag-pending');
+			startSeatDrag(seatDragDelay.seatNode, e.clientX, e.clientY, seatDragDelay.tableId, seatDragDelay.seatIndex, seatDragDelay.guestId);
+			seatDragDelay = null;
+		}
+	}
+
+	function onSeatDragDelayUp(e) {
+		if (!seatDragDelay) return;
+
+		// Cancel drag delay
+		clearTimeout(seatDragDelay.timeoutId);
+		seatDragDelay.seatNode.classList.remove('seat-drag-pending');
+
+		// Open popover instead
+		openSeatPopover(seatDragDelay.seatNode, e.clientX, e.clientY);
+
+		document.removeEventListener('mousemove', onSeatDragDelayMove);
+		document.removeEventListener('mouseup', onSeatDragDelayUp);
+		seatDragDelay = null;
+	}
+
 	function findSeatAtPosition(clientX, clientY) {
 		const canvas = document.getElementById('canvas');
 		const canvasRect = canvas.getBoundingClientRect();
@@ -883,7 +942,7 @@
 
 				const seatSpan = document.createElement('span');
 				seatSpan.className = 'seat-number';
-				seatSpan.textContent = `Seat ${item.seatNumber}`;
+				seatSpan.textContent = window.i18n.t('seatNumber', { number: item.seatNumber });
 
 				guestItem.appendChild(pictureContainer);
 				guestItem.appendChild(colorDot);

@@ -334,10 +334,11 @@
 	function deleteGuest(id) { pushHistory(); state.guests = state.guests.filter(g => g.id !== id); for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === id) delete t.assignments[k]; } } save(); window.TablePlanner.render(); }
 	function setGuestSort(sort) { state.ui.guestSort = sort; save(); window.TablePlanner.render(); }
 	function setGuestUnassignedOnly(flag) { state.ui.guestUnassignedOnly = !!flag; save(); window.TablePlanner.render(); }
+	function setGuestSearch(search) { state.ui.guestSearch = search; save(); window.TablePlanner.render(); }
 
 	function assignGuestToSeat(tableId, seatIndex, guestId) { pushHistory(); const table = state.tables.find(t => t.id === tableId); if (!table) return; if (seatIndex < 0 || seatIndex >= table.seats) return; for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === guestId) { delete t.assignments[k]; } } } table.assignments[String(seatIndex)] = guestId; save(); window.TablePlanner.render(); }
 	function unassignSeat(tableId, seatIndex) { pushHistory(); const table = state.tables.find(t => t.id === tableId); if (!table) return; delete table.assignments[String(seatIndex)]; save(); window.TablePlanner.render(); }
-	function setTableSeats(tableId, newSeats) { pushHistory(); const t = state.tables.find(t => t.id === tableId); if (!t) return false; const seats = Math.max(1, Math.min(32, Math.floor(newSeats))); if (seats === t.seats) return true; if (seats > t.seats) { t.seats = seats; save(); window.TablePlanner.render(); return true; } const lost = []; for (const k in t.assignments) { const idx = Number(k); if (idx >= seats) { lost.push({ seat: idx, guestId: t.assignments[k] }); } } if (lost.length) { const confirmMsg = `Reducing seats to ${seats} will unassign ${lost.length} guest(s). Continue?`; if (!window.confirm(confirmMsg)) { state._history.past.pop(); return false; } for (const item of lost) { delete t.assignments[String(item.seat)]; } } t.seats = seats; save(); window.TablePlanner.render(); return true; }
+	function setTableSeats(tableId, newSeats) { pushHistory(); const t = state.tables.find(t => t.id === tableId); if (!t) return false; const seats = Math.max(1, Math.min(32, Math.floor(newSeats))); if (seats === t.seats) return true; if (seats > t.seats) { t.seats = seats; save(); window.TablePlanner.render(); return true; } const lost = []; for (const k in t.assignments) { const idx = Number(k); if (idx >= seats) { lost.push({ seat: idx, guestId: t.assignments[k] }); } } if (lost.length) { const confirmMsg = window.i18n.t('reduceSeatsConfirm', { seats, count: lost.length }); if (!window.confirm(confirmMsg)) { state._history.past.pop(); return false; } for (const item of lost) { delete t.assignments[String(item.seat)]; } } t.seats = seats; save(); window.TablePlanner.render(); return true; }
 
 	function setSnap(flag) {
 		state.ui.snap = !!flag;
@@ -516,6 +517,7 @@
 		deleteGuest,
 		setGuestSort,
 		setGuestUnassignedOnly,
+		setGuestSearch,
 		assignGuestToSeat,
 		unassignSeat,
 		setTableSeats,

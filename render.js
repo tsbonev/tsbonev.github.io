@@ -3,6 +3,39 @@
 	const SIDE_MARGIN = 24; // margin from corners along edges for seat spacing
 	const SQUARE_THRESHOLD = 1.0; // we will still use longer sides always; square uses all sides
 
+	// Color conversion helper functions
+	function hexToRgb(hex) {
+		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : { r: 0, g: 0, b: 0 };
+	}
+
+	function rgbToHsl(r, g, b) {
+		r /= 255;
+		g /= 255;
+		b /= 255;
+		const max = Math.max(r, g, b);
+		const min = Math.min(r, g, b);
+		let h, s, l = (max + min) / 2;
+
+		if (max === min) {
+			h = s = 0; // achromatic
+		} else {
+			const d = max - min;
+			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+			switch (max) {
+				case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+				case g: h = (b - r) / d + 2; break;
+				case b: h = (r - g) / d + 4; break;
+			}
+			h /= 6;
+		}
+		return { h: h * 360, s: s * 100, l: l * 100 };
+	}
+
 	function render() {
 		const { state } = window.TablePlanner;
 		const canvas = document.getElementById('canvas');
@@ -164,6 +197,21 @@
 		let guests = window.TablePlanner.state.guests.slice();
 		if (window.TablePlanner.state.ui.guestSort === 'name') {
 			guests.sort((a, b) => a.name.localeCompare(b.name));
+		} else if (window.TablePlanner.state.ui.guestSort === 'color') {
+			guests.sort((a, b) => {
+				// Convert hex colors to RGB for proper sorting
+				const colorA = hexToRgb(a.color || '#6aa9ff');
+				const colorB = hexToRgb(b.color || '#6aa9ff');
+
+				// Sort by hue (primary), then saturation, then lightness
+				const hueA = rgbToHsl(colorA.r, colorA.g, colorA.b).h;
+				const hueB = rgbToHsl(colorB.r, colorB.g, colorB.b).h;
+
+				if (hueA !== hueB) return hueA - hueB;
+
+				// If same hue, sort by name
+				return a.name.localeCompare(b.name);
+			});
 		} else if (window.TablePlanner.state.ui.guestSort === 'assignedFirst') {
 			guests.sort((a, b) => {
 				const aAssigned = guestIdToAssignment.has(a.id) ? 1 : 0;
@@ -180,6 +228,13 @@
 
 		if (window.TablePlanner.state.ui.guestUnassignedOnly) {
 			guests = guests.filter(g => !guestIdToAssignment.has(g.id));
+		}
+
+		// Apply search filter
+		const searchTerm = window.TablePlanner.state.ui.guestSearch;
+		if (searchTerm && searchTerm.trim()) {
+			const searchLower = searchTerm.toLowerCase().trim();
+			guests = guests.filter(g => g.name.toLowerCase().includes(searchLower));
 		}
 
 		for (const g of guests) {
@@ -231,7 +286,7 @@
 			colorInput.dataset.role = 'color';
 
 			const delBtn = document.createElement('button');
-			delBtn.textContent = 'Delete';
+			delBtn.textContent = '✕';
 			delBtn.dataset.role = 'delete-guest';
 
 			const status = document.createElement('div');
@@ -337,7 +392,7 @@
 		node.style.width = (table.radius * 2) + 'px';
 		node.style.height = (table.radius * 2) + 'px';
 		node.dataset.id = table.id;
-		node.title = 'Table ' + table.label;
+		node.title = window.i18n.t('tableTitle', { label: table.label });
 
 		node.appendChild(createLabel(table));
 		if (isSelected) {
@@ -384,7 +439,7 @@
 		node.style.width = table.width + 'px';
 		node.style.height = table.height + 'px';
 		node.dataset.id = table.id;
-		node.title = 'Table ' + table.label;
+		node.title = window.i18n.t('tableTitle', { label: table.label });
 
 		node.appendChild(createLabel(table));
 		if (isSelected) {
@@ -451,7 +506,7 @@
 		node.style.width = separator.width + 'px';
 		node.style.height = separator.height + 'px';
 		node.dataset.id = separator.id;
-		node.title = 'Separator';
+		node.title = window.i18n.t('separatorTitle');
 
 		if (isSelected) {
 			addSelectionOutline(node, 'rect', { x: separator.x, y: separator.y, w: separator.width, h: separator.height });

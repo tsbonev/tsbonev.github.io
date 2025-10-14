@@ -34,6 +34,7 @@
 		guestForm.addEventListener('submit', onGuestAdd);
 		document.getElementById('guestSortSelect').addEventListener('change', onGuestSort);
 		document.getElementById('guestUnassignedOnly').addEventListener('change', onGuestFilter);
+		document.getElementById('guestSearchInput').addEventListener('input', onGuestSearch);
 		const guestList = document.getElementById('guestList');
 		guestList.addEventListener('change', onGuestListChange);
 		guestList.addEventListener('click', onGuestListClick);
@@ -199,6 +200,7 @@
 	}
 	function onGuestSort(e) { window.TablePlanner.setGuestSort(e.target.value); }
 	function onGuestFilter(e) { window.TablePlanner.setGuestUnassignedOnly(e.target.checked); }
+	function onGuestSearch(e) { window.TablePlanner.setGuestSearch(e.target.value); }
 
 	function onGuestListChange(e) {
 		const role = e.target.dataset.role;
@@ -218,7 +220,7 @@
 			const row = btn.closest('.guest-row');
 			if (!row) return;
 			const id = row.dataset.id;
-			const ok = window.confirm('Delete this guest and unassign from any seat?');
+			const ok = window.confirm(window.i18n.t('deleteGuestConfirm'));
 			if (!ok) return;
 			window.TablePlanner.deleteGuest(id);
 			updateCounts();
@@ -288,7 +290,7 @@
 			try {
 				const obj = JSON.parse(String(reader.result));
 				const err = validateImport(obj);
-				if (err) { alert('Import failed: ' + err); return; }
+				if (err) { alert(window.i18n.t('importFailed', { error: err })); return; }
 				window.TablePlanner.state.version = obj.version || 1;
 				window.TablePlanner.state.guests = Array.isArray(obj.guests) ? obj.guests : [];
 				window.TablePlanner.state.tables = Array.isArray(obj.tables) ? obj.tables : [];
@@ -299,7 +301,7 @@
 				updateCounts();
 				if (window.updateControlsVisibility) window.updateControlsVisibility();
 			} catch (err) {
-				alert('Import failed: invalid JSON');
+				alert(window.i18n.t('importFailedInvalidJson'));
 			}
 		};
 		reader.readAsText(file);
