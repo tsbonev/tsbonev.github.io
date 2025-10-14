@@ -7,21 +7,25 @@
 			version: 1,
 			guests: [],
 			tables: [],
-			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg' },
+			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg', sidebarCollapsed: false },
 			pictures: { folderPath: null, folderHandle: null, imageCache: {} },
 			_history: { past: [], future: [], suppress: false }
 		};
 	}
 
 	function migrate(obj) {
-		if (!obj.ui) obj.ui = { selectedTableId: null, selectedTableIds: [], zoom: 1 };
+		if (!obj.ui) obj.ui = { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0 };
 		if (obj.ui.selectedTableIds === undefined) obj.ui.selectedTableIds = [];
+		if (obj.ui.zoom === undefined) obj.ui.zoom = 1;
+		if (obj.ui.panX === undefined) obj.ui.panX = 0;
+		if (obj.ui.panY === undefined) obj.ui.panY = 0;
 		if (obj.ui.guestSort === undefined) obj.ui.guestSort = 'unassignedFirst';
 		if (obj.ui.guestUnassignedOnly === undefined) obj.ui.guestUnassignedOnly = false;
 		if (obj.ui.snap === undefined) obj.ui.snap = false;
 		if (obj.ui.grid === undefined) obj.ui.grid = 64;
 		if (obj.ui.showGrid === undefined) obj.ui.showGrid = true;
 		if (obj.ui.language === undefined) obj.ui.language = 'bg';
+		if (obj.ui.sidebarCollapsed === undefined) obj.ui.sidebarCollapsed = false;
 		if (!obj.pictures) obj.pictures = { folderPath: null, folderHandle: null, imageCache: {} };
 		if (!obj._history) obj._history = { past: [], future: [], suppress: false };
 		for (const t of (obj.tables || [])) {
@@ -335,6 +339,30 @@
 		save();
 	}
 
+	function setZoom(zoom) {
+		state.ui.zoom = Math.max(0.1, Math.min(5, zoom));
+		save();
+	}
+
+	function setPan(x, y) {
+		state.ui.panX = x;
+		state.ui.panY = y;
+		save();
+	}
+
+	function resetView() {
+		state.ui.zoom = 1;
+		state.ui.panX = 0;
+		state.ui.panY = 0;
+		save();
+		window.TablePlanner.render();
+	}
+
+	function setSidebarCollapsed(collapsed) {
+		state.ui.sidebarCollapsed = !!collapsed;
+		save();
+	}
+
 	const state = load();
 
 	function setLanguage(lang) {
@@ -465,6 +493,12 @@
 		// snapping
 		setSnap,
 		setGridSize,
+		// zoom and pan
+		setZoom,
+		setPan,
+		resetView,
+		// sidebar
+		setSidebarCollapsed,
 		addTableCircle,
 		addTableRect,
 		addSeparator,

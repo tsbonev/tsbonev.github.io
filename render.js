@@ -41,6 +41,18 @@
 		canvas.style.setProperty('--grid', baseGridSize + 'px');
 		canvas.style.backgroundImage = window.TablePlanner.state.ui.showGrid === false ? 'none' : '';
 
+		// Apply zoom and pan transforms
+		const zoom = window.TablePlanner.state.ui.zoom || 1;
+		const panX = window.TablePlanner.state.ui.panX || 0;
+		const panY = window.TablePlanner.state.ui.panY || 0;
+		canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+
+		// Update zoom level display
+		const zoomLevelEl = document.getElementById('zoomLevel');
+		if (zoomLevelEl) {
+			zoomLevelEl.textContent = Math.round(zoom * 100) + '%';
+		}
+
 		for (const table of window.TablePlanner.state.tables) {
 			const isSelected = window.TablePlanner.state.ui.selectedTableIds.includes(table.id);
 			if (table.type === 'rect') {

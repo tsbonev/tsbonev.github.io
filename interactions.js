@@ -3,6 +3,7 @@
 	let resize = null;
 	let popover = null;
 	let dragSelect = null;
+	let pan = null;
 
 	function intersects(a, b) {
 		if (a.type === 'circle' && b.type === 'circle') {
@@ -83,6 +84,7 @@
 
 	function updateSelectionRect(rect) {
 		const canvas = document.getElementById('canvas');
+		const canvasWrap = canvas.parentElement;
 		let rectEl = document.getElementById('selection-rect');
 		if (!rectEl) {
 			rectEl = document.createElement('div');
@@ -92,10 +94,17 @@
 			rectEl.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
 			rectEl.style.pointerEvents = 'none';
 			rectEl.style.zIndex = '1000';
-			canvas.appendChild(rectEl);
+			canvasWrap.appendChild(rectEl);
 		}
-		rectEl.style.left = rect.x + 'px';
-		rectEl.style.top = rect.y + 'px';
+
+		// Convert screen coordinates to canvas-wrap relative coordinates
+		const canvasWrapRect = canvasWrap.getBoundingClientRect();
+		const relativeX = rect.x - canvasWrapRect.left;
+		const relativeY = rect.y - canvasWrapRect.top;
+
+		// Position the selection rectangle relative to canvas-wrap
+		rectEl.style.left = relativeX + 'px';
+		rectEl.style.top = relativeY + 'px';
 		rectEl.style.width = rect.width + 'px';
 		rectEl.style.height = rect.height + 'px';
 		rectEl.style.display = 'block';
@@ -111,6 +120,27 @@
 
 	function onCanvasMouseDown(e) {
 		const target = e.target;
+
+		// Handle right-click or middle-click for panning
+		if (e.button === 2 || e.button === 1) { // Right mouse button or middle mouse button
+			e.preventDefault();
+			pan = {
+				startX: e.clientX,
+				startY: e.clientY,
+				startPanX: window.TablePlanner.state.ui.panX,
+				startPanY: window.TablePlanner.state.ui.panY
+			};
+			// Add panning class to canvas and canvas-wrap
+			const canvas = document.getElementById('canvas');
+			const canvasWrap = canvas.parentElement;
+			canvas.classList.add('panning');
+			canvasWrap.classList.add('panning');
+			document.addEventListener('mousemove', onPanMove);
+			document.addEventListener('mouseup', onPanUp);
+			document.addEventListener('contextmenu', (e) => e.preventDefault());
+			return;
+		}
+
 		// If clicking into the editable label, allow text editing and do not start select/drag
 		if (target.closest && target.closest('[data-role="table-label"]')) {
 			return; // let contentEditable handle focus and selection
@@ -124,11 +154,6 @@
 			const dir = handle.dataset.dir;
 			const t = getTable(id);
 			if (!t) return;
-
-			// Debug: Log which table we're starting to resize
-			if (t.type === 'circle' || t.type === 'rect' || t.type === 'separator') {
-				console.log('Starting resize on table:', t.id, 'type:', t.type, 'dir:', dir);
-			}
 
 			closePopover();
 			// Start history group for resize operations
@@ -179,10 +204,19 @@
 				originalPositions[table.id] = { x: table.x, y: table.y };
 			}
 
+			// Calculate offset accounting for zoom and pan
+			const canvas = document.getElementById('canvas');
+			const canvasRect = canvas.getBoundingClientRect();
+			const zoom = window.TablePlanner.state.ui.zoom || 1;
+			const panX = window.TablePlanner.state.ui.panX || 0;
+			const panY = window.TablePlanner.state.ui.panY || 0;
+			const canvasX = (e.clientX - canvasRect.left) / zoom;
+			const canvasY = (e.clientY - canvasRect.top) / zoom;
+
 			drag = {
 				id,
-				offsetX: e.clientX - t.x,
-				offsetY: e.clientY - t.y,
+				offsetX: canvasX - t.x,
+				offsetY: canvasY - t.y,
 				originalPositions
 			};
 			document.addEventListener('mousemove', onDragMove);
@@ -198,11 +232,9 @@
 		}
 		closePopover();
 
-		// Get canvas position
-		const canvas = document.getElementById('canvas');
-		const canvasRect = canvas.getBoundingClientRect();
-		const startX = e.clientX - canvasRect.left;
-		const startY = e.clientY - canvasRect.top;
+		// Store screen coordinates for drag selection
+		const startX = e.clientX;
+		const startY = e.clientY;
 
 		dragSelect = { startX, startY, endX: startX, endY: startY };
 		document.addEventListener('mousemove', onDragSelectMove);
@@ -247,6 +279,13 @@
 			return;
 		}
 
+		// Handle Ctrl+0 or Cmd+0 for reset view
+		if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+			e.preventDefault();
+			window.TablePlanner.resetView();
+			return;
+		}
+
 		// Handle arrow key movement for selected tables
 		const selectedIds = window.TablePlanner.state.ui.selectedTableIds;
 		if (selectedIds.length === 0) return;
@@ -283,8 +322,17 @@
 
 	function onDragMove(e) {
 		if (!drag) return;
-		let x = e.clientX - drag.offsetX;
-		let y = e.clientY - drag.offsetY;
+		// Convert screen coordinates to canvas coordinates accounting for transform
+		const canvas = document.getElementById('canvas');
+		const canvasRect = canvas.getBoundingClientRect();
+		const zoom = window.TablePlanner.state.ui.zoom || 1;
+		const panX = window.TablePlanner.state.ui.panX || 0;
+		const panY = window.TablePlanner.state.ui.panY || 0;
+		const canvasX = (e.clientX - canvasRect.left) / zoom;
+		const canvasY = (e.clientY - canvasRect.top) / zoom;
+
+		let x = canvasX - drag.offsetX;
+		let y = canvasY - drag.offsetY;
 		const ui = window.TablePlanner.state.ui;
 		if (ui.snap) { const g = ui.grid || 12; x = Math.round(x / g) * g; y = Math.round(y / g) * g; }
 
@@ -323,12 +371,13 @@
 
 	function onDragSelectMove(e) {
 		if (!dragSelect) return;
-		const canvas = document.getElementById('canvas');
-		const canvasRect = canvas.getBoundingClientRect();
-		dragSelect.endX = e.clientX - canvasRect.left;
-		dragSelect.endY = e.clientY - canvasRect.top;
+		// Update end coordinates in screen space
+		dragSelect.endX = e.clientX;
+		dragSelect.endY = e.clientY;
 
 		const rect = createSelectionRect(dragSelect.startX, dragSelect.startY, dragSelect.endX, dragSelect.endY);
+
+
 		updateSelectionRect(rect);
 	}
 
@@ -337,14 +386,32 @@
 		document.removeEventListener('mousemove', onDragSelectMove);
 		document.removeEventListener('mouseup', onDragSelectUp);
 
-		const rect = createSelectionRect(dragSelect.startX, dragSelect.startY, dragSelect.endX, dragSelect.endY);
+
+		// Convert screen coordinates to canvas coordinates for table intersection detection
+		const canvas = document.getElementById('canvas');
+		const canvasRect = canvas.getBoundingClientRect();
+		const zoom = window.TablePlanner.state.ui.zoom || 1;
+		const panX = window.TablePlanner.state.ui.panX || 0;
+		const panY = window.TablePlanner.state.ui.panY || 0;
+
+		const startCanvasX = (dragSelect.startX - canvasRect.left) / zoom;
+		const startCanvasY = (dragSelect.startY - canvasRect.top) / zoom;
+		const endCanvasX = (dragSelect.endX - canvasRect.left) / zoom;
+		const endCanvasY = (dragSelect.endY - canvasRect.top) / zoom;
+
+		const rect = createSelectionRect(startCanvasX, startCanvasY, endCanvasX, endCanvasY);
+
+
 		removeSelectionRect();
 
 		// Find tables in selection rectangle
 		const state = window.TablePlanner.state;
 		const selectedIds = [];
 		for (const table of state.tables) {
-			if (isTableInSelectionRect(table, rect)) {
+			const bounds = getTableBounds(table);
+			const intersects = isTableInSelectionRect(table, rect);
+			console.log(`Table ${table.id} (${table.type}): bounds=${JSON.stringify(bounds)}, intersects=${intersects}`);
+			if (intersects) {
 				selectedIds.push(table.id);
 			}
 		}
@@ -360,11 +427,6 @@
 		if (!resize) return;
 		const t = getTable(resize.id);
 		if (!t) return;
-
-		// Debug: Ensure we're working with the correct table
-		if (t.type === 'circle' || t.type === 'rect' || t.type === 'separator') {
-			console.log('Resizing table:', t.id, 'type:', t.type, 'current size:', t.width || t.radius);
-		}
 
 		if (t.type === 'circle' && resize.dir === 'e') {
 			const dx = e.clientX - resize.startX;
@@ -397,6 +459,28 @@
 		// End history group for resize operations
 		window.TablePlanner.endHistoryGroup();
 		resize = null;
+	}
+
+	function onPanMove(e) {
+		if (!pan) return;
+		const deltaX = e.clientX - pan.startX;
+		const deltaY = e.clientY - pan.startY;
+		const newPanX = pan.startPanX + deltaX;
+		const newPanY = pan.startPanY + deltaY;
+		window.TablePlanner.setPan(newPanX, newPanY);
+		window.TablePlanner.render();
+	}
+
+	function onPanUp() {
+		if (!pan) return;
+		// Remove panning class from canvas and canvas-wrap
+		const canvas = document.getElementById('canvas');
+		const canvasWrap = canvas.parentElement;
+		canvas.classList.remove('panning');
+		canvasWrap.classList.remove('panning');
+		document.removeEventListener('mousemove', onPanMove);
+		document.removeEventListener('mouseup', onPanUp);
+		pan = null;
 	}
 
 	function openSeatPopover(seatNode, clientX, clientY) {
@@ -742,10 +826,38 @@
 
 	let interactionsBound = false;
 
+	function onCanvasWheel(e) {
+		e.preventDefault();
+		const delta = e.deltaY > 0 ? 0.9 : 1.1; // Zoom out or in
+		const currentZoom = window.TablePlanner.state.ui.zoom;
+		const newZoom = Math.max(0.1, Math.min(5, currentZoom * delta));
+
+		// Get mouse position relative to canvas
+		const canvas = document.getElementById('canvas');
+		const canvasRect = canvas.getBoundingClientRect();
+		const mouseX = e.clientX - canvasRect.left;
+		const mouseY = e.clientY - canvasRect.top;
+
+		// Calculate zoom point in canvas coordinates
+		const zoomPointX = (mouseX - window.TablePlanner.state.ui.panX) / currentZoom;
+		const zoomPointY = (mouseY - window.TablePlanner.state.ui.panY) / currentZoom;
+
+		// Update zoom
+		window.TablePlanner.setZoom(newZoom);
+
+		// Adjust pan to keep the zoom point under the mouse
+		const newPanX = mouseX - zoomPointX * newZoom;
+		const newPanY = mouseY - zoomPointY * newZoom;
+		window.TablePlanner.setPan(newPanX, newPanY);
+
+		window.TablePlanner.render();
+	}
+
 	function bindInteractions() {
 		if (interactionsBound) return; // Only bind once
 		const canvas = document.getElementById('canvas');
 		canvas.addEventListener('mousedown', onCanvasMouseDown);
+		canvas.addEventListener('wheel', onCanvasWheel, { passive: false });
 		document.addEventListener('keydown', onKeyDown);
 		interactionsBound = true;
 	}

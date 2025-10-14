@@ -18,6 +18,9 @@
 		document.getElementById('selectPictureFolderBtn').addEventListener('click', onSelectPictureFolder);
 		document.getElementById('scanPicturesBtn').addEventListener('click', onScanPictures);
 
+		// Sidebar toggle
+		document.getElementById('sidebarToggle').addEventListener('click', onSidebarToggle);
+
 		// Language toggle
 		document.getElementById('languageBtn').addEventListener('click', () => {
 			const currentLang = state.ui.language || 'en';
@@ -58,6 +61,7 @@
 
 		// Initial UI sync then render
 		syncGridControls();
+		initializeSidebarState();
 		window.i18n.updateUI(); // Apply translations
 		window.TablePlanner.render();
 		updateCounts();
@@ -362,6 +366,12 @@
 	}
 
 	async function onScanPictures() {
+		// Check if a folder is selected before attempting to scan
+		if (!window.TablePlanner.state.pictures.folderHandle) {
+			alert(window.i18n.t('pictureFolderNotSelected'));
+			return;
+		}
+
 		const scanBtn = document.getElementById('scanPicturesBtn');
 		const originalText = scanBtn.textContent;
 
@@ -397,6 +407,26 @@
 		} else {
 			statusEl.style.display = 'none';
 			scanBtn.style.display = 'none';
+		}
+	}
+
+	function onSidebarToggle() {
+		const layout = document.querySelector('.layout');
+		const isCollapsed = layout.classList.contains('sidebar-collapsed');
+
+		if (isCollapsed) {
+			layout.classList.remove('sidebar-collapsed');
+			window.TablePlanner.setSidebarCollapsed(false);
+		} else {
+			layout.classList.add('sidebar-collapsed');
+			window.TablePlanner.setSidebarCollapsed(true);
+		}
+	}
+
+	function initializeSidebarState() {
+		const layout = document.querySelector('.layout');
+		if (window.TablePlanner.state.ui.sidebarCollapsed) {
+			layout.classList.add('sidebar-collapsed');
 		}
 	}
 
