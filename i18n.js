@@ -1,9 +1,9 @@
-(function(){
+(function () {
 	const translations = {
 		en: {
 			// Toolbar
 			'addCircleTableBtn': 'Add Circular Table',
-            'addRectTableBtn': 'Add Rectangular Table',
+			'addRectTableBtn': 'Add Rectangular Table',
 			'addSeparatorBtn': 'Add Separator',
 			'snapToggle': 'Snap',
 			'gridSizeInput': 'Grid',
@@ -12,7 +12,7 @@
 			'redoBtn': 'Redo',
 			'exportBtn': 'Export Plan',
 			'importBtn': 'Import Plan',
-			
+
 			// Sidebar
 			'guestsTitle': 'Guests',
 			'exportGuestsCsvBtn': 'Export Guests CSV',
@@ -35,25 +35,30 @@
 			'sideRight': 'Right',
 			'sideBottom': 'Bottom',
 			'sideLeft': 'Left',
-			
+
 			// Counts
 			'tableCount': 'Tables: {count}',
 			'seatCount': 'Seats: {count}',
 			'guestCounts': 'Total: {total} | Assigned: {assigned} | Unassigned: {unassigned}',
-			
+
 			// Seat assignment popover
 			'searchGuests': 'Search guests...',
 			'assignBtn': 'Assign',
 			'unassignBtn': 'Unassign',
-			
+
 			// Messages
 			'deleteTableConfirm': 'Delete table "{label}" with {count} assigned guests?',
-			'importGuestsFailed': 'Import guests failed: invalid CSV'
+			'importGuestsFailed': 'Import guests failed: invalid CSV',
+
+			// Seat and status text
+			'seat': 'Seat',
+			'unassigned': 'Unassigned',
+			'table': 'Table'
 		},
 		bg: {
 			// Toolbar
 			'addCircleTableBtn': 'Добави Кръгла Маса',
-            'addRectTableBtn': 'Добави Правоъгълна Маса',
+			'addRectTableBtn': 'Добави Правоъгълна Маса',
 			'addSeparatorBtn': 'Добави Разделител',
 			'snapToggle': 'Прилепване',
 			'gridSizeInput': 'Мрежа',
@@ -62,7 +67,7 @@
 			'redoBtn': 'Повтори',
 			'exportBtn': 'Експорт План',
 			'importBtn': 'Импорт План',
-			
+
 			// Sidebar
 			'guestsTitle': 'Гости',
 			'exportGuestsCsvBtn': 'Експорт Гости CSV',
@@ -85,44 +90,49 @@
 			'sideRight': 'Дясно',
 			'sideBottom': 'Долу',
 			'sideLeft': 'Ляво',
-			
+
 			// Counts
 			'tableCount': 'Маси: {count}',
 			'seatCount': 'Места: {count}',
 			'guestCounts': 'Общо: {total} | Разпределени: {assigned} | Неразпределени: {unassigned}',
-			
+
 			// Seat assignment popover
 			'searchGuests': 'Търси гости...',
 			'assignBtn': 'Разпредели',
 			'unassignBtn': 'Премахни',
-			
+
 			// Messages
 			'deleteTableConfirm': 'Изтрий маса "{label}" с {count} разпределени гости?',
-			'importGuestsFailed': 'Импорт на гости неуспешен: невалиден CSV'
+			'importGuestsFailed': 'Импорт на гости неуспешен: невалиден CSV',
+
+			// Seat and status text
+			'seat': 'Място',
+			'unassigned': 'Неразпределен',
+			'table': 'Маса'
 		}
 	};
 
-	function t(key, params = {}){
+	function t(key, params = {}) {
 		const lang = window.TablePlanner?.state?.ui?.language || 'en';
 		let text = translations[lang]?.[key] || translations.en[key] || key;
-		
+
 		// Simple parameter replacement
-		for(const [param, value] of Object.entries(params)){
+		for (const [param, value] of Object.entries(params)) {
 			text = text.replace(new RegExp(`{${param}}`, 'g'), value);
 		}
-		
+
 		return text;
 	}
 
-	function updateUI(){
+	function updateUI() {
 		const lang = window.TablePlanner?.state?.ui?.language || 'en';
-		
+
 		// Update all elements with data-i18n attributes
 		document.querySelectorAll('[data-i18n]').forEach(el => {
 			const key = el.getAttribute('data-i18n');
-			if(el.tagName === 'INPUT' && el.type === 'submit'){
+			if (el.tagName === 'INPUT' && el.type === 'submit') {
 				el.value = t(key);
-			} else if(el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'number')){
+			} else if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'number')) {
 				el.placeholder = t(key);
 			} else {
 				el.textContent = t(key);
@@ -136,7 +146,7 @@
 		});
 
 		// Update counts and dynamic content
-		if(window.updateCounts) window.updateCounts();
+		if (window.updateCounts) window.updateCounts();
 	}
 
 	window.i18n = { t, updateUI };
