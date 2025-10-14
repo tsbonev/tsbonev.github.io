@@ -60,6 +60,15 @@
 		if (window.updateControlsVisibility) window.updateControlsVisibility();
 
 		renderGuestSidebar();
+
+		// Show table guests for selected table
+		const selectedTableId = window.TablePlanner.state.ui.selectedTableId;
+		if (selectedTableId && window.TablePlanner.showTableGuests) {
+			window.TablePlanner.showTableGuests(selectedTableId);
+		} else if (window.TablePlanner.clearTableGuests) {
+			window.TablePlanner.clearTableGuests();
+		}
+
 		window.TablePlanner.bindInteractions();
 	}
 

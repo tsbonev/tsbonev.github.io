@@ -165,6 +165,9 @@
 				}
 			}
 
+			// Show table guests in sidebar
+			showTableGuests(id);
+
 			closePopover();
 			// start grouped history for drag
 			window.TablePlanner.beginHistoryGroup();
@@ -191,6 +194,7 @@
 		// Start drag selection if clicking on empty canvas
 		if (!e.ctrlKey && !e.metaKey) {
 			window.TablePlanner.clearSelection();
+			clearTableGuests();
 		}
 		closePopover();
 
@@ -512,6 +516,182 @@
 		return window.TablePlanner.state.tables.find(t => t.id === id);
 	}
 
+	function showTableGuests(tableId) {
+		const tableGuestsEl = document.getElementById('tableGuests');
+		const tableGuestsListEl = document.getElementById('tableGuestsList');
+
+		if (!tableGuestsEl || !tableGuestsListEl) return;
+
+		const table = getTable(tableId);
+		if (!table || !table.assignments) {
+			tableGuestsEl.style.display = 'none';
+			return;
+		}
+
+		// Clear existing content
+		tableGuestsListEl.innerHTML = '';
+
+		// Get all assigned guests for this table
+		const assignedGuests = [];
+		for (const seatIndex in table.assignments) {
+			const guestId = table.assignments[seatIndex];
+			if (guestId) {
+				const guest = window.TablePlanner.state.guests.find(g => g.id === guestId);
+				if (guest) {
+					assignedGuests.push({
+						guest: guest,
+						seatNumber: parseInt(seatIndex) + 1
+					});
+				}
+			}
+		}
+
+		// Sort by seat number
+		assignedGuests.sort((a, b) => a.seatNumber - b.seatNumber);
+
+		// Show the section if there are guests
+		if (assignedGuests.length > 0) {
+			tableGuestsEl.style.display = 'block';
+
+			// Create guest items
+			for (const item of assignedGuests) {
+				const guestItem = document.createElement('div');
+				guestItem.className = 'table-guest-item';
+
+				const colorDot = document.createElement('div');
+				colorDot.className = 'guest-color';
+				colorDot.style.backgroundColor = item.guest.color || '#6aa9ff';
+				colorDot.draggable = true;
+				colorDot.dataset.guestId = item.guest.id;
+
+				const nameInput = document.createElement('input');
+				nameInput.type = 'text';
+				nameInput.className = 'guest-name';
+				nameInput.value = item.guest.name;
+				nameInput.dataset.guestId = item.guest.id;
+
+				const seatSpan = document.createElement('span');
+				seatSpan.className = 'seat-number';
+				seatSpan.textContent = `Seat ${item.seatNumber}`;
+
+				guestItem.appendChild(colorDot);
+				guestItem.appendChild(nameInput);
+				guestItem.appendChild(seatSpan);
+
+				tableGuestsListEl.appendChild(guestItem);
+			}
+
+			// Add event listeners for editing and drag & drop
+			setupTableGuestsInteractions(tableGuestsListEl);
+		} else {
+			tableGuestsEl.style.display = 'none';
+		}
+	}
+
+	function clearTableGuests() {
+		const tableGuestsEl = document.getElementById('tableGuests');
+		if (tableGuestsEl) {
+			tableGuestsEl.style.display = 'none';
+		}
+	}
+
+	function setupTableGuestsInteractions(container) {
+		// Handle name editing
+		const nameInputs = container.querySelectorAll('.guest-name');
+		nameInputs.forEach(input => {
+			input.addEventListener('blur', (e) => {
+				const guestId = e.target.dataset.guestId;
+				const newName = e.target.value.trim();
+				if (newName && newName !== e.target.defaultValue) {
+					window.TablePlanner.updateGuest(guestId, { name: newName });
+					e.target.defaultValue = newName;
+				}
+			});
+
+			input.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') {
+					e.target.blur();
+				}
+			});
+		});
+
+		// Handle color drag and drop
+		const colorDots = container.querySelectorAll('.guest-color');
+		colorDots.forEach(dot => {
+			dot.addEventListener('dragstart', (e) => {
+				e.dataTransfer.setData('text/plain', e.target.dataset.guestId);
+				e.target.classList.add('dragging');
+			});
+
+			dot.addEventListener('dragend', (e) => {
+				e.target.classList.remove('dragging');
+				// Remove all drop-target classes
+				container.querySelectorAll('.guest-color').forEach(d => {
+					d.classList.remove('drop-target');
+				});
+			});
+
+			dot.addEventListener('dragover', (e) => {
+				e.preventDefault();
+				e.target.classList.add('drop-target');
+			});
+
+			dot.addEventListener('dragleave', (e) => {
+				e.target.classList.remove('drop-target');
+			});
+
+			dot.addEventListener('drop', (e) => {
+				e.preventDefault();
+				e.target.classList.remove('drop-target');
+
+				const sourceGuestId = e.dataTransfer.getData('text/plain');
+				const targetGuestId = e.target.dataset.guestId;
+
+				if (sourceGuestId && targetGuestId && sourceGuestId !== targetGuestId) {
+					// Copy color from source to target
+					const sourceGuest = window.TablePlanner.state.guests.find(g => g.id === sourceGuestId);
+					const targetGuest = window.TablePlanner.state.guests.find(g => g.id === targetGuestId);
+
+					if (sourceGuest && targetGuest) {
+						window.TablePlanner.updateGuest(targetGuestId, { color: sourceGuest.color });
+					}
+				}
+			});
+
+			// Handle color click to open color picker
+			dot.addEventListener('click', (e) => {
+				const guestId = e.target.dataset.guestId;
+				const guest = window.TablePlanner.state.guests.find(g => g.id === guestId);
+				if (guest) {
+					openColorPicker(e.target, guest);
+				}
+			});
+		});
+	}
+
+	function openColorPicker(colorElement, guest) {
+		// Create a temporary color input
+		const colorInput = document.createElement('input');
+		colorInput.type = 'color';
+		colorInput.value = guest.color || '#6aa9ff';
+		colorInput.style.position = 'absolute';
+		colorInput.style.left = '-9999px';
+		colorInput.style.opacity = '0';
+
+		document.body.appendChild(colorInput);
+		colorInput.click();
+
+		colorInput.addEventListener('change', (e) => {
+			const newColor = e.target.value;
+			window.TablePlanner.updateGuest(guest.id, { color: newColor });
+			document.body.removeChild(colorInput);
+		});
+
+		colorInput.addEventListener('blur', () => {
+			document.body.removeChild(colorInput);
+		});
+	}
+
 	let interactionsBound = false;
 
 	function bindInteractions() {
@@ -522,5 +702,11 @@
 		interactionsBound = true;
 	}
 
-	window.TablePlanner = Object.assign(window.TablePlanner || {}, { bindInteractions });
+	window.TablePlanner = Object.assign(window.TablePlanner || {}, {
+		bindInteractions,
+		showTableGuests,
+		clearTableGuests,
+		setupTableGuestsInteractions,
+		openColorPicker
+	});
 })();
