@@ -516,6 +516,16 @@
 		return window.TablePlanner.state.tables.find(t => t.id === id);
 	}
 
+	function getInitials(name) {
+		if (!name) return '';
+		const caps = (name.match(/[A-Z]/g) || []).join('');
+		if (caps.length >= 2) return caps.slice(0, 2);
+		if (caps.length === 1) return caps;
+		const parts = name.trim().split(/\s+/);
+		if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+		return (parts[0][0] + parts[1][0]).toUpperCase();
+	}
+
 	function showTableGuests(tableId) {
 		const tableGuestsEl = document.getElementById('tableGuests');
 		const tableGuestsListEl = document.getElementById('tableGuestsList');
@@ -558,6 +568,24 @@
 				const guestItem = document.createElement('div');
 				guestItem.className = 'table-guest-item';
 
+				// Guest picture or initials
+				const pictureContainer = document.createElement('div');
+				pictureContainer.className = 'table-guest-picture-container';
+				if (item.guest.picture) {
+					const picture = document.createElement('img');
+					picture.className = 'table-guest-picture';
+					picture.src = item.guest.picture;
+					picture.alt = item.guest.name;
+					picture.title = item.guest.name;
+					pictureContainer.appendChild(picture);
+				} else {
+					const initials = document.createElement('div');
+					initials.className = 'table-guest-initials';
+					initials.textContent = getInitials(item.guest.name);
+					initials.style.backgroundColor = item.guest.color || '#6aa9ff';
+					pictureContainer.appendChild(initials);
+				}
+
 				const colorDot = document.createElement('div');
 				colorDot.className = 'guest-color';
 				colorDot.style.backgroundColor = item.guest.color || '#6aa9ff';
@@ -574,6 +602,7 @@
 				seatSpan.className = 'seat-number';
 				seatSpan.textContent = `Seat ${item.seatNumber}`;
 
+				guestItem.appendChild(pictureContainer);
 				guestItem.appendChild(colorDot);
 				guestItem.appendChild(nameInput);
 				guestItem.appendChild(seatSpan);
@@ -664,6 +693,25 @@
 				const guest = window.TablePlanner.state.guests.find(g => g.id === guestId);
 				if (guest) {
 					openColorPicker(e.target, guest);
+				}
+			});
+		});
+
+		// Handle picture click to remove picture
+		const pictureContainers = container.querySelectorAll('.table-guest-picture-container');
+		pictureContainers.forEach(container => {
+			container.addEventListener('click', (e) => {
+				const guestItem = e.target.closest('.table-guest-item');
+				if (!guestItem) return;
+
+				const guestId = guestItem.querySelector('.guest-name').dataset.guestId;
+				const guest = window.TablePlanner.state.guests.find(g => g.id === guestId);
+
+				if (guest && guest.picture) {
+					const confirmRemove = window.confirm(window.i18n.t('pictureRemoveConfirm', { name: guest.name }));
+					if (confirmRemove) {
+						window.TablePlanner.removePictureFromGuest(guestId);
+					}
 				}
 			});
 		});

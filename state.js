@@ -8,6 +8,7 @@
 			guests: [],
 			tables: [],
 			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg' },
+			pictures: { folderPath: null, folderHandle: null, imageCache: {} },
 			_history: { past: [], future: [], suppress: false }
 		};
 	}
@@ -21,6 +22,7 @@
 		if (obj.ui.grid === undefined) obj.ui.grid = 64;
 		if (obj.ui.showGrid === undefined) obj.ui.showGrid = true;
 		if (obj.ui.language === undefined) obj.ui.language = 'bg';
+		if (!obj.pictures) obj.pictures = { folderPath: null, folderHandle: null, imageCache: {} };
 		if (!obj._history) obj._history = { past: [], future: [], suppress: false };
 		for (const t of (obj.tables || [])) {
 			if (t.type === 'rect') {
@@ -28,6 +30,10 @@
 				if (!t.oneSide) t.oneSide = 'top';
 				if (!t.oddExtraSide) t.oddExtraSide = 'top';
 			}
+		}
+		// Migrate guests to add picture property
+		for (const g of (obj.guests || [])) {
+			if (g.picture === undefined) g.picture = null;
 		}
 		return obj;
 	}
@@ -309,7 +315,7 @@
 	function setRectOneSide(id, side) { pushHistory(); const t = state.tables.find(t => t.id === id && t.type === 'rect'); if (!t) return; if (!['top', 'right', 'bottom', 'left'].includes(side)) return; t.oneSide = side; save(); window.TablePlanner.render(); }
 	function setRectOddExtraSide(id, side) { pushHistory(); const t = state.tables.find(t => t.id === id && t.type === 'rect'); if (!t) return; if (!['top', 'right', 'bottom', 'left'].includes(side)) return; t.oddExtraSide = side; save(); window.TablePlanner.render(); }
 
-	function addGuest(name, color) { pushHistory(); const g = { id: 'g_' + Math.random().toString(36).slice(2, 8), name: name.trim(), color: color || '#6aa9ff' }; if (!g.name) return; state.guests.push(g); save(); window.TablePlanner.render(); }
+	function addGuest(name, color) { pushHistory(); const g = { id: 'g_' + Math.random().toString(36).slice(2, 8), name: name.trim(), color: color || '#6aa9ff', picture: null }; if (!g.name) return; state.guests.push(g); save(); window.TablePlanner.render(); }
 	function updateGuest(id, patch) { pushHistory(); const g = state.guests.find(g => g.id === id); if (!g) return; Object.assign(g, patch); save(); window.TablePlanner.render(); }
 	function deleteGuest(id) { pushHistory(); state.guests = state.guests.filter(g => g.id !== id); for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === id) delete t.assignments[k]; } } save(); window.TablePlanner.render(); }
 	function setGuestSort(sort) { state.ui.guestSort = sort; save(); window.TablePlanner.render(); }
@@ -334,6 +340,117 @@
 	function setLanguage(lang) {
 		state.ui.language = lang;
 		save();
+	}
+
+	// Picture management functions
+	function normalizeName(name) {
+		console.log(`normalizeName input: "${name}"`);
+		const step1 = name.toLowerCase();
+		console.log(`  step1 (toLowerCase): "${step1}"`);
+		const result = step1.replace(/[\s\-_]+/g, '_');
+		return result;
+	}
+
+	function setPictureFolder(folderHandle) {
+		pushHistory();
+		state.pictures.folderHandle = folderHandle;
+		state.pictures.folderPath = folderHandle ? folderHandle.name : null;
+		state.pictures.imageCache = {}; // Clear cache when folder changes
+		save();
+		window.TablePlanner.render();
+	}
+
+	function assignPictureToGuest(guestId, imageUrl) {
+		pushHistory();
+		const guest = state.guests.find(g => g.id === guestId);
+		if (guest) {
+			guest.picture = imageUrl;
+			save();
+			window.TablePlanner.render();
+		}
+	}
+
+	function removePictureFromGuest(guestId) {
+		pushHistory();
+		const guest = state.guests.find(g => g.id === guestId);
+		if (guest) {
+			guest.picture = null;
+			save();
+			window.TablePlanner.render();
+		}
+	}
+
+	async function scanFolderForPictures() {
+		if (!state.pictures.folderHandle) return;
+
+		try {
+			const files = [];
+			for await (const [name, handle] of state.pictures.folderHandle.entries()) {
+				if (handle.kind === 'file' && name.toLowerCase().endsWith('.png')) {
+					files.push({ name: name.replace(/\.png$/i, ''), handle });
+				}
+			}
+
+			console.log('=== PICTURE SCANNING DEBUG ===');
+			console.log('Found PNG files:', files.map(f => f.name));
+
+			// First, clear all existing pictures to ensure clean state
+			for (const guest of state.guests) {
+				if (guest.picture) {
+					// Revoke the old object URL to free memory
+					if (guest.picture.startsWith('blob:')) {
+						URL.revokeObjectURL(guest.picture);
+					}
+					guest.picture = null;
+				}
+			}
+
+			console.log('Guest names:', state.guests.map(g => g.name));
+
+			// Match files to guests - only assign if there's an exact match
+			const matches = [];
+			for (const guest of state.guests) {
+				const normalizedGuestName = normalizeName(guest.name);
+				console.log(`Guest "${guest.name}" -> normalized: "${normalizedGuestName}"`);
+
+				for (const file of files) {
+					const normalizedFileName = normalizeName(file.name);
+					console.log(`  File "${file.name}" -> normalized: "${normalizedFileName}"`);
+
+					if (normalizedGuestName === normalizedFileName && normalizedGuestName.length > 0) {
+						console.log(`  ✅ MATCH FOUND: "${guest.name}" <-> "${file.name}"`);
+						matches.push({ guest, file });
+						break; // Take first match
+					} else {
+						console.log(`  ❌ No match`);
+					}
+				}
+			}
+
+			console.log(`Total matches found: ${matches.length}`);
+			console.log('=== END DEBUG ===');
+
+			// Assign pictures to guests only for exact matches
+			for (const { guest, file } of matches) {
+				try {
+					const fileHandle = await state.pictures.folderHandle.getFileHandle(file.name + '.png');
+					const fileObj = await fileHandle.getFile();
+					const imageUrl = URL.createObjectURL(fileObj);
+					guest.picture = imageUrl;
+					state.pictures.imageCache[guest.id] = imageUrl;
+				} catch (error) {
+					console.warn(`Failed to load image for ${guest.name}:`, error);
+					guest.picture = null; // Ensure no picture if loading fails
+				}
+			}
+
+			save();
+			window.TablePlanner.render();
+			return matches.length;
+		} catch (error) {
+			console.error('Error scanning folder for pictures:', error);
+			return 0;
+		}
 	}
 
 
@@ -375,6 +492,12 @@
 		unassignSeat,
 		setTableSeats,
 		setLanguage,
+		// picture management
+		normalizeName,
+		setPictureFolder,
+		assignPictureToGuest,
+		removePictureFromGuest,
+		scanFolderForPictures,
 		save
 	});
 })();

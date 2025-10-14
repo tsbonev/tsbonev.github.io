@@ -93,19 +93,40 @@
 			seatEl.style.background = '#eceff1';
 			seatEl.title = window.i18n.t('seat') + ' ' + (index + 1);
 			seatEl.textContent = '';
+			seatEl.innerHTML = '';
 			return;
 		}
 		const g = getGuestById(gid);
 		if (g) {
 			seatEl.classList.add('assigned');
 			seatEl.style.background = g.color || '#6aa9ff';
-			seatEl.title = g.name + ' (' + window.i18n.t('seat') + ' ' + (index + 1) + ')';
-			seatEl.textContent = getInitials(g.name);
+			seatEl.title = ''; // Remove tooltip since we have hover enlargement
+
+			// Clear previous content
+			seatEl.innerHTML = '';
+
+			if (g.picture) {
+				const picture = document.createElement('img');
+				picture.className = 'seat-picture';
+				picture.src = g.picture;
+				picture.alt = g.name;
+				picture.title = ''; // Remove tooltip
+				seatEl.appendChild(picture);
+			} else {
+				seatEl.textContent = getInitials(g.name);
+			}
+
+			// Add guest name label that appears on hover
+			const nameLabel = document.createElement('div');
+			nameLabel.className = 'seat-name-label';
+			nameLabel.textContent = g.name;
+			seatEl.appendChild(nameLabel);
 		} else {
 			seatEl.classList.remove('assigned');
 			seatEl.style.background = '#eceff1';
 			seatEl.title = window.i18n.t('seat') + ' ' + (index + 1);
 			seatEl.textContent = '';
+			seatEl.innerHTML = '';
 		}
 	}
 
@@ -143,6 +164,24 @@
 			row.className = 'guest-row';
 			row.dataset.id = g.id;
 
+			// Guest picture or initials
+			const pictureContainer = document.createElement('div');
+			pictureContainer.className = 'guest-picture-container';
+			if (g.picture) {
+				const picture = document.createElement('img');
+				picture.className = 'guest-picture';
+				picture.src = g.picture;
+				picture.alt = g.name;
+				picture.title = g.name;
+				pictureContainer.appendChild(picture);
+			} else {
+				const initials = document.createElement('div');
+				initials.className = 'guest-initials';
+				initials.textContent = getInitials(g.name);
+				initials.style.backgroundColor = g.color || '#6aa9ff';
+				pictureContainer.appendChild(initials);
+			}
+
 			const nameInput = document.createElement('input');
 			nameInput.type = 'text';
 			nameInput.value = g.name;
@@ -162,6 +201,7 @@
 			const assign = guestIdToAssignment.get(g.id);
 			status.textContent = assign ? `${window.i18n.t('table')} ${assign.tableLabel} • ${window.i18n.t('seat')} ${assign.seat + 1}` : window.i18n.t('unassigned');
 
+			row.appendChild(pictureContainer);
 			row.appendChild(nameInput);
 			row.appendChild(colorInput);
 			row.appendChild(delBtn);

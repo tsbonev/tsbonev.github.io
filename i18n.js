@@ -17,6 +17,8 @@
 			'guestsTitle': 'Guests',
 			'exportGuestsCsvBtn': 'Export Guests CSV',
 			'importGuestsCsvBtn': 'Import Guests CSV',
+			'selectPictureFolderBtn': 'Select Picture Folder',
+			'scanPicturesBtn': 'Scan for Pictures',
 			'guestNameInput': 'Guest name',
 			'guestFormSubmit': 'Add',
 			'guestSortLabel': 'Sort:',
@@ -49,6 +51,13 @@
 			// Messages
 			'deleteTableConfirm': 'Delete table "{label}" with {count} assigned guests?',
 			'importGuestsFailed': 'Import guests failed: invalid CSV',
+			'pictureFolderNotSupported': 'Your browser does not support folder selection. Please use Chrome or Edge for this feature.',
+			'pictureFolderSelectFailed': 'Failed to select folder. Please try again.',
+			'pictureScanning': 'Scanning...',
+			'pictureScanSuccess': 'Found and assigned {count} picture(s) to guests.',
+			'pictureScanNoMatches': 'No matching pictures found. Make sure PNG files have names that match guest names (case-insensitive, spaces/dashes normalized).',
+			'pictureScanFailed': 'Failed to scan pictures. Please try again.',
+			'pictureRemoveConfirm': 'Remove picture for {name}?',
 
 			// Seat and status text
 			'seat': 'Seat',
@@ -72,6 +81,8 @@
 			'guestsTitle': 'Гости',
 			'exportGuestsCsvBtn': 'Експорт Гости CSV',
 			'importGuestsCsvBtn': 'Импорт Гости CSV',
+			'selectPictureFolderBtn': 'Избери Папка със Снимки',
+			'scanPicturesBtn': 'Сканирай за Снимки',
 			'guestNameInput': 'Име на гост',
 			'guestFormSubmit': 'Добави',
 			'guestSortLabel': 'Сортиране:',
@@ -104,6 +115,13 @@
 			// Messages
 			'deleteTableConfirm': 'Изтрий маса "{label}" с {count} разпределени гости?',
 			'importGuestsFailed': 'Импорт на гости неуспешен: невалиден CSV',
+			'pictureFolderNotSupported': 'Вашият браузър не поддържа избор на папка. Моля използвайте Chrome или Edge за тази функция.',
+			'pictureFolderSelectFailed': 'Неуспешен избор на папка. Моля опитайте отново.',
+			'pictureScanning': 'Сканиране...',
+			'pictureScanSuccess': 'Намерени и присвоени {count} снимка(и) на гости.',
+			'pictureScanNoMatches': 'Не са намерени съответстващи снимки. Уверете се, че PNG файловете имат имена, които съответстват на имената на гостите (без значение на регистъра, интервалите/тиретата се нормализират).',
+			'pictureScanFailed': 'Неуспешно сканиране на снимки. Моля опитайте отново.',
+			'pictureRemoveConfirm': 'Премахни снимката за {name}?',
 
 			// Seat and status text
 			'seat': 'Място',
