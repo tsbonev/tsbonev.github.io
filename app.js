@@ -193,9 +193,11 @@
 		e.preventDefault();
 		const name = document.getElementById('guestNameInput').value;
 		const color = document.getElementById('guestColorInput').value;
+		const isChild = document.getElementById('guestChildInput').checked;
 		if (!name.trim()) return;
-		window.TablePlanner.addGuest(name, color);
+		window.TablePlanner.addGuest(name, color, isChild);
 		document.getElementById('guestNameInput').value = '';
+		document.getElementById('guestChildInput').checked = false;
 		updateCounts();
 	}
 	function onGuestSort(e) { window.TablePlanner.setGuestSort(e.target.value); }
@@ -211,6 +213,8 @@
 			window.TablePlanner.updateGuest(id, { name: e.target.value });
 		} else if (role === 'color') {
 			window.TablePlanner.updateGuest(id, { color: e.target.value });
+		} else if (role === 'child') {
+			window.TablePlanner.updateGuest(id, { isChild: e.target.checked });
 		}
 	}
 

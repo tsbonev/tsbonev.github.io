@@ -35,9 +35,10 @@
 				if (!t.oddExtraSide) t.oddExtraSide = 'top';
 			}
 		}
-		// Migrate guests to add picture property
+		// Migrate guests to add picture and isChild properties
 		for (const g of (obj.guests || [])) {
 			if (g.picture === undefined) g.picture = null;
+			if (g.isChild === undefined) g.isChild = false;
 		}
 		return obj;
 	}
@@ -329,7 +330,7 @@
 	function setRectOneSide(id, side) { pushHistory(); const t = state.tables.find(t => t.id === id && t.type === 'rect'); if (!t) return; if (!['top', 'right', 'bottom', 'left'].includes(side)) return; t.oneSide = side; save(); window.TablePlanner.render(); }
 	function setRectOddExtraSide(id, side) { pushHistory(); const t = state.tables.find(t => t.id === id && t.type === 'rect'); if (!t) return; if (!['top', 'right', 'bottom', 'left'].includes(side)) return; t.oddExtraSide = side; save(); window.TablePlanner.render(); }
 
-	function addGuest(name, color) { pushHistory(); const g = { id: 'g_' + Math.random().toString(36).slice(2, 8), name: name.trim(), color: color || '#6aa9ff', picture: null }; if (!g.name) return; state.guests.push(g); save(); window.TablePlanner.render(); }
+	function addGuest(name, color, isChild = false) { pushHistory(); const g = { id: 'g_' + Math.random().toString(36).slice(2, 8), name: name.trim(), color: color || '#6aa9ff', picture: null, isChild: !!isChild }; if (!g.name) return; state.guests.push(g); save(); window.TablePlanner.render(); }
 	function updateGuest(id, patch) { pushHistory(); const g = state.guests.find(g => g.id === id); if (!g) return; Object.assign(g, patch); save(); window.TablePlanner.render(); }
 	function deleteGuest(id) { pushHistory(); state.guests = state.guests.filter(g => g.id !== id); for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === id) delete t.assignments[k]; } } save(); window.TablePlanner.render(); }
 	function setGuestSort(sort) { state.ui.guestSort = sort; save(); window.TablePlanner.render(); }

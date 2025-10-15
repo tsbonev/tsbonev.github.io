@@ -898,6 +898,9 @@
 				// Guest picture or initials
 				const pictureContainer = document.createElement('div');
 				pictureContainer.className = 'table-guest-picture-container';
+				if (item.guest.isChild) {
+					pictureContainer.classList.add('child');
+				}
 				if (item.guest.picture) {
 					const picture = document.createElement('img');
 					picture.className = 'table-guest-picture';
@@ -940,6 +943,19 @@
 				nameInput.value = item.guest.name;
 				nameInput.dataset.guestId = item.guest.id;
 
+				const childCheckbox = document.createElement('input');
+				childCheckbox.type = 'checkbox';
+				childCheckbox.checked = !!item.guest.isChild;
+				childCheckbox.dataset.guestId = item.guest.id;
+				childCheckbox.dataset.role = 'child';
+
+				const childLabel = document.createElement('label');
+				childLabel.className = 'table-child-checkbox-label';
+				childLabel.appendChild(childCheckbox);
+				const labelSpan = document.createElement('span');
+				labelSpan.textContent = window.i18n.t('guestChildLabel');
+				childLabel.appendChild(labelSpan);
+
 				const seatSpan = document.createElement('span');
 				seatSpan.className = 'seat-number';
 				seatSpan.textContent = window.i18n.t('seatNumber', { number: item.seatNumber });
@@ -947,6 +963,7 @@
 				guestItem.appendChild(pictureContainer);
 				guestItem.appendChild(colorDot);
 				guestItem.appendChild(nameInput);
+				guestItem.appendChild(childLabel);
 				guestItem.appendChild(seatSpan);
 
 				tableGuestsListEl.appendChild(guestItem);
@@ -1036,6 +1053,15 @@
 				if (guest) {
 					openColorPicker(e.target, guest);
 				}
+			});
+		});
+
+		// Handle child checkbox changes
+		const childCheckboxes = container.querySelectorAll('input[data-role="child"]');
+		childCheckboxes.forEach(checkbox => {
+			checkbox.addEventListener('change', (e) => {
+				const guestId = e.target.dataset.guestId;
+				window.TablePlanner.updateGuest(guestId, { isChild: e.target.checked });
 			});
 		});
 

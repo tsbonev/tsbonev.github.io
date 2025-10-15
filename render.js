@@ -147,6 +147,13 @@
 			seatEl.style.background = g.color || '#6aa9ff';
 			seatEl.title = ''; // Remove tooltip since we have hover enlargement
 
+			// Apply child styling if guest is a child
+			if (g.isChild) {
+				seatEl.classList.add('child');
+			} else {
+				seatEl.classList.remove('child');
+			}
+
 			// Clear previous content
 			seatEl.innerHTML = '';
 
@@ -212,6 +219,31 @@
 				// If same hue, sort by name
 				return a.name.localeCompare(b.name);
 			});
+		} else if (window.TablePlanner.state.ui.guestSort === 'childFirst') {
+			guests.sort((a, b) => {
+				const aChild = a.isChild ? 1 : 0;
+				const bChild = b.isChild ? 1 : 0;
+				return bChild - aChild || a.name.localeCompare(b.name);
+			});
+		} else if (window.TablePlanner.state.ui.guestSort === 'tableSeat') {
+			guests.sort((a, b) => {
+				const aAssignment = guestIdToAssignment.get(a.id);
+				const bAssignment = guestIdToAssignment.get(b.id);
+				
+				// Unassigned guests go to the end
+				if (!aAssignment && !bAssignment) return a.name.localeCompare(b.name);
+				if (!aAssignment) return 1;
+				if (!bAssignment) return -1;
+				
+				// Sort by table label first (numeric if possible)
+				const aTableNum = parseInt(aAssignment.tableLabel) || 999999;
+				const bTableNum = parseInt(bAssignment.tableLabel) || 999999;
+				
+				if (aTableNum !== bTableNum) return aTableNum - bTableNum;
+				
+				// Then by seat number
+				return aAssignment.seat - bAssignment.seat;
+			});
 		} else if (window.TablePlanner.state.ui.guestSort === 'assignedFirst') {
 			guests.sort((a, b) => {
 				const aAssigned = guestIdToAssignment.has(a.id) ? 1 : 0;
@@ -245,6 +277,9 @@
 			// Guest picture or initials
 			const pictureContainer = document.createElement('div');
 			pictureContainer.className = 'guest-picture-container';
+			if (g.isChild) {
+				pictureContainer.classList.add('child');
+			}
 			if (g.picture) {
 				const picture = document.createElement('img');
 				picture.className = 'guest-picture';
@@ -285,6 +320,18 @@
 			colorInput.value = g.color || '#6aa9ff';
 			colorInput.dataset.role = 'color';
 
+			const childCheckbox = document.createElement('input');
+			childCheckbox.type = 'checkbox';
+			childCheckbox.checked = !!g.isChild;
+			childCheckbox.dataset.role = 'child';
+
+			const childLabel = document.createElement('label');
+			childLabel.className = 'child-checkbox-label';
+			childLabel.appendChild(childCheckbox);
+			const labelSpan = document.createElement('span');
+			labelSpan.textContent = window.i18n.t('guestChildLabel');
+			childLabel.appendChild(labelSpan);
+
 			const delBtn = document.createElement('button');
 			delBtn.textContent = '✕';
 			delBtn.dataset.role = 'delete-guest';
@@ -297,6 +344,7 @@
 			row.appendChild(pictureContainer);
 			row.appendChild(nameInput);
 			row.appendChild(colorInput);
+			row.appendChild(childLabel);
 			row.appendChild(delBtn);
 			row.appendChild(status);
 			list.appendChild(row);
