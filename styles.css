@@ -120,14 +120,14 @@ body {
 .sidebar-toggle {
 	position: fixed;
 	top: 50%;
-	right: 0;
+	right: 400px; /* Position to the left of the sidebar when open */
 	transform: translateY(-50%);
 	width: 24px;
 	height: 60px;
 	background: #4257b2;
 	border: 2px solid #4257b2;
-	border-left: none;
-	border-radius: 0 8px 8px 0;
+	border-right: none;
+	border-radius: 8px 0 0 8px;
 	cursor: pointer;
 	z-index: 1000;
 	display: flex;
@@ -144,12 +144,19 @@ body {
 	background: #3448a0;
 	border-color: #3448a0;
 	color: white;
-	transform: translateY(-50%) translateX(-1px);
+	transform: translateY(-50%) translateX(1px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .layout.sidebar-collapsed .sidebar-toggle {
 	right: 0px;
+	border-right: 2px solid #4257b2;
+	border-left: none;
+	border-radius: 8px 0 0 8px;
+}
+
+.sidebar-toggle::before {
+	content: '‹';
 }
 
 .layout.sidebar-collapsed .sidebar-toggle::before {

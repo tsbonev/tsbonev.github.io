@@ -865,6 +865,18 @@
 			return;
 		}
 
+		// Update the title dynamically based on table label
+		const titleEl = tableGuestsEl.querySelector('h3');
+		if (titleEl) {
+			const label = String(table.label);
+			const isNumeric = !isNaN(label) && !isNaN(parseFloat(label));
+			if (isNumeric) {
+				titleEl.textContent = `Гости на Маса ${label}`;
+			} else {
+				titleEl.textContent = `Гости на ${label}`;
+			}
+		}
+
 		// Clear existing content
 		tableGuestsListEl.innerHTML = '';
 
@@ -980,6 +992,11 @@
 		const tableGuestsEl = document.getElementById('tableGuests');
 		if (tableGuestsEl) {
 			tableGuestsEl.style.display = 'none';
+			// Reset title to default
+			const titleEl = tableGuestsEl.querySelector('h3');
+			if (titleEl) {
+				titleEl.textContent = window.i18n.t('tableGuestsTitle');
+			}
 		}
 	}
 

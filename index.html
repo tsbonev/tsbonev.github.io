@@ -45,12 +45,45 @@
 		<section class="canvas-wrap">
 			<div id="canvas" class="canvas" tabindex="0"></div>
 		</section>
-		<button id="sidebarToggle" class="sidebar-toggle" data-i18n-attr="title:toggleSidebar">‹</button>
+		<button id="sidebarToggle" class="sidebar-toggle" data-i18n-attr="title:toggleSidebar"></button>
 		<aside id="sidebar" class="sidebar">
 			<h2><span data-i18n="guestsTitle">Guests</span> <span id="guestCounts" class="count-pill"></span></h2>
 			<div id="tableGuests" class="table-guests" style="display:none">
-				<h3 data-i18n="tableGuestsTitle">Table Guests</h3>
+				<h3>Table Guests</h3>
 				<div id="tableGuestsList" class="table-guests-list"></div>
+				<div id="tableControls" class="table-controls" style="display:none">
+					<h3 data-i18n="tableControlsTitle">Selected Table</h3>
+					<label><span data-i18n="seatCountLabel">Seats:</span>
+						<input id="seatCountInput" type="number" min="1" max="32" step="1" />
+						<button id="applySeatCountBtn" type="button" data-i18n="applySeatCountBtn">Apply</button>
+					</label>
+					<div id="rectControls" class="rect-controls" style="display:none">
+						<label><input type="checkbox" id="oneSidedToggle" /> <span data-i18n="oneSidedToggle">One-sided
+								(rect only)</span></label>
+						<div class="side-group" id="oneSideGroup" style="display:none">
+							<div data-i18n="seatSideLabel">Seat side:</div>
+							<label><input type="radio" name="oneSide" value="top" /> <span
+									data-i18n="sideTop">Top</span></label>
+							<label><input type="radio" name="oneSide" value="right" /> <span
+									data-i18n="sideRight">Right</span></label>
+							<label><input type="radio" name="oneSide" value="bottom" /> <span
+									data-i18n="sideBottom">Bottom</span></label>
+							<label><input type="radio" name="oneSide" value="left" /> <span
+									data-i18n="sideLeft">Left</span></label>
+						</div>
+						<div class="side-group" id="oddExtraGroup" style="display:none">
+							<div data-i18n="oddExtraSeatLabel">Odd extra seat to:</div>
+							<label><input type="radio" name="oddExtraSide" value="top" /> <span
+									data-i18n="sideTop">Top</span></label>
+							<label><input type="radio" name="oddExtraSide" value="right" /> <span
+									data-i18n="sideRight">Right</span></label>
+							<label><input type="radio" name="oddExtraSide" value="bottom" /> <span
+									data-i18n="sideBottom">Bottom</span></label>
+							<label><input type="radio" name="oddExtraSide" value="left" /> <span
+									data-i18n="sideLeft">Left</span></label>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="guest-pictures">
 				<button id="selectPictureFolderBtn" type="button" data-i18n="selectPictureFolderBtn">Select Picture
@@ -95,39 +128,6 @@
 				<input id="guestSearchInput" type="text" data-i18n="guestSearchInput" placeholder="Search guests..." />
 			</div>
 			<div class="selected-info" id="selectedInfo"></div>
-			<div id="tableControls" class="table-controls" style="display:none">
-				<h3 data-i18n="tableControlsTitle">Selected Table</h3>
-				<label><span data-i18n="seatCountLabel">Seats:</span>
-					<input id="seatCountInput" type="number" min="1" max="32" step="1" />
-					<button id="applySeatCountBtn" type="button" data-i18n="applySeatCountBtn">Apply</button>
-				</label>
-				<div id="rectControls" class="rect-controls" style="display:none">
-					<label><input type="checkbox" id="oneSidedToggle" /> <span data-i18n="oneSidedToggle">One-sided
-							(rect only)</span></label>
-					<div class="side-group" id="oneSideGroup" style="display:none">
-						<div data-i18n="seatSideLabel">Seat side:</div>
-						<label><input type="radio" name="oneSide" value="top" /> <span
-								data-i18n="sideTop">Top</span></label>
-						<label><input type="radio" name="oneSide" value="right" /> <span
-								data-i18n="sideRight">Right</span></label>
-						<label><input type="radio" name="oneSide" value="bottom" /> <span
-								data-i18n="sideBottom">Bottom</span></label>
-						<label><input type="radio" name="oneSide" value="left" /> <span
-								data-i18n="sideLeft">Left</span></label>
-					</div>
-					<div class="side-group" id="oddExtraGroup" style="display:none">
-						<div data-i18n="oddExtraSeatLabel">Odd extra seat to:</div>
-						<label><input type="radio" name="oddExtraSide" value="top" /> <span
-								data-i18n="sideTop">Top</span></label>
-						<label><input type="radio" name="oddExtraSide" value="right" /> <span
-								data-i18n="sideRight">Right</span></label>
-						<label><input type="radio" name="oddExtraSide" value="bottom" /> <span
-								data-i18n="sideBottom">Bottom</span></label>
-						<label><input type="radio" name="oddExtraSide" value="left" /> <span
-								data-i18n="sideLeft">Left</span></label>
-					</div>
-				</div>
-			</div>
 			<div id="guestList" class="guest-list"></div>
 		</aside>
 	</main>
