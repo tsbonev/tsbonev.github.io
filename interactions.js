@@ -1038,7 +1038,12 @@
 
 			dot.addEventListener('dragover', (e) => {
 				e.preventDefault();
-				e.target.classList.add('drop-target');
+				// Only allow drop if it's from another guest or from legend
+				const isLegendColor = e.dataTransfer.types.includes('application/legend-color');
+				const isGuestColor = e.dataTransfer.getData('text/plain') && !isLegendColor;
+				if (isLegendColor || isGuestColor) {
+					e.target.classList.add('drop-target');
+				}
 			});
 
 			dot.addEventListener('dragleave', (e) => {
@@ -1049,16 +1054,29 @@
 				e.preventDefault();
 				e.target.classList.remove('drop-target');
 
-				const sourceGuestId = e.dataTransfer.getData('text/plain');
-				const targetGuestId = e.target.dataset.guestId;
+				const isLegendColor = e.dataTransfer.types.includes('application/legend-color');
+				
+				if (isLegendColor) {
+					// Drop from legend - apply the color to the target guest
+					const color = e.dataTransfer.getData('text/plain');
+					const targetGuestId = e.target.dataset.guestId;
+					
+					if (color && targetGuestId) {
+						window.TablePlanner.updateGuest(targetGuestId, { color: color });
+					}
+				} else {
+					// Drop from another guest - copy color from source to target
+					const sourceGuestId = e.dataTransfer.getData('text/plain');
+					const targetGuestId = e.target.dataset.guestId;
 
-				if (sourceGuestId && targetGuestId && sourceGuestId !== targetGuestId) {
-					// Copy color from source to target
-					const sourceGuest = window.TablePlanner.state.guests.find(g => g.id === sourceGuestId);
-					const targetGuest = window.TablePlanner.state.guests.find(g => g.id === targetGuestId);
+					if (sourceGuestId && targetGuestId && sourceGuestId !== targetGuestId) {
+						// Copy color from source to target
+						const sourceGuest = window.TablePlanner.state.guests.find(g => g.id === sourceGuestId);
+						const targetGuest = window.TablePlanner.state.guests.find(g => g.id === targetGuestId);
 
-					if (sourceGuest && targetGuest) {
-						window.TablePlanner.updateGuest(targetGuestId, { color: sourceGuest.color });
+						if (sourceGuest && targetGuest) {
+							window.TablePlanner.updateGuest(targetGuestId, { color: sourceGuest.color });
+						}
 					}
 				}
 			});

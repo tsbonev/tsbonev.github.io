@@ -9,6 +9,7 @@
 			tables: [],
 			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg', sidebarCollapsed: false },
 			pictures: { folderPath: null, folderHandle: null, imageCache: {} },
+			colorLegend: {}, // Maps color hex codes to custom labels
 			_history: { past: [], future: [], suppress: false }
 		};
 	}
@@ -27,6 +28,7 @@
 		if (obj.ui.language === undefined) obj.ui.language = 'bg';
 		if (obj.ui.sidebarCollapsed === undefined) obj.ui.sidebarCollapsed = false;
 		if (!obj.pictures) obj.pictures = { folderPath: null, folderHandle: null, imageCache: {} };
+		if (!obj.colorLegend) obj.colorLegend = {};
 		if (!obj._history) obj._history = { past: [], future: [], suppress: false };
 		for (const t of (obj.tables || [])) {
 			if (t.type === 'rect') {
@@ -111,7 +113,13 @@
 	}
 
 	function save() {
-		const persisted = { version: state.version, guests: state.guests, tables: state.tables, ui: state.ui };
+		const persisted = { 
+			version: state.version, 
+			guests: state.guests, 
+			tables: state.tables, 
+			ui: state.ui,
+			colorLegend: state.colorLegend
+		};
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
 	}
 
@@ -330,12 +338,86 @@
 	function setRectOneSide(id, side) { pushHistory(); const t = state.tables.find(t => t.id === id && t.type === 'rect'); if (!t) return; if (!['top', 'right', 'bottom', 'left'].includes(side)) return; t.oneSide = side; save(); window.TablePlanner.render(); }
 	function setRectOddExtraSide(id, side) { pushHistory(); const t = state.tables.find(t => t.id === id && t.type === 'rect'); if (!t) return; if (!['top', 'right', 'bottom', 'left'].includes(side)) return; t.oddExtraSide = side; save(); window.TablePlanner.render(); }
 
-	function addGuest(name, color, isChild = false) { pushHistory(); const g = { id: 'g_' + Math.random().toString(36).slice(2, 8), name: name.trim(), color: color || '#6aa9ff', picture: null, isChild: !!isChild }; if (!g.name) return; state.guests.push(g); save(); window.TablePlanner.render(); }
-	function updateGuest(id, patch) { pushHistory(); const g = state.guests.find(g => g.id === id); if (!g) return; Object.assign(g, patch); save(); window.TablePlanner.render(); }
-	function deleteGuest(id) { pushHistory(); state.guests = state.guests.filter(g => g.id !== id); for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === id) delete t.assignments[k]; } } save(); window.TablePlanner.render(); }
+	function addGuest(name, color, isChild = false) { pushHistory(); const g = { id: 'g_' + Math.random().toString(36).slice(2, 8), name: name.trim(), color: color || '#6aa9ff', picture: null, isChild: !!isChild }; if (!g.name) return; state.guests.push(g); save(); window.TablePlanner.render(); if (window.updateLegendButtonPosition) window.updateLegendButtonPosition(); }
+	function updateGuest(id, patch) { pushHistory(); const g = state.guests.find(g => g.id === id); if (!g) return; Object.assign(g, patch); save(); window.TablePlanner.render(); if (window.updateLegendButtonPosition) window.updateLegendButtonPosition(); }
+	function deleteGuest(id) { pushHistory(); state.guests = state.guests.filter(g => g.id !== id); for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === id) delete t.assignments[k]; } } save(); window.TablePlanner.render(); if (window.updateLegendButtonPosition) window.updateLegendButtonPosition(); }
 	function setGuestSort(sort) { state.ui.guestSort = sort; save(); window.TablePlanner.render(); }
 	function setGuestUnassignedOnly(flag) { state.ui.guestUnassignedOnly = !!flag; save(); window.TablePlanner.render(); }
 	function setGuestSearch(search) { state.ui.guestSearch = search; save(); window.TablePlanner.render(); }
+
+	// Color legend functions
+	function getUniqueGuestColors() {
+		const colors = new Set();
+		for (const guest of state.guests) {
+			if (guest.color) {
+				colors.add(guest.color);
+			}
+		}
+		// Sort by label alphabetically, fallback to color hex if no label
+		return Array.from(colors).sort((a, b) => {
+			const labelA = state.colorLegend[a] || '';
+			const labelB = state.colorLegend[b] || '';
+			
+			// If both have labels, sort by label
+			if (labelA && labelB) {
+				return labelA.localeCompare(labelB);
+			}
+			// If only one has a label, prioritize it
+			if (labelA && !labelB) return -1;
+			if (!labelA && labelB) return 1;
+			// If neither has a label, sort by color hex
+			return a.localeCompare(b);
+		});
+	}
+
+	function updateColorLegendLabel(color, label) {
+		pushHistory();
+		if (label && label.trim()) {
+			state.colorLegend[color] = label.trim();
+		} else {
+			delete state.colorLegend[color];
+		}
+		save();
+		// Don't call render() here to avoid focus loss - just update the specific input
+		updateLegendInputValue(color, label);
+	}
+
+	function updateLegendInputValue(color, label) {
+		// Find the input field for this color and update its value without losing focus
+		const legendContent = document.getElementById('legendContent');
+		if (!legendContent) return;
+		
+		const input = legendContent.querySelector(`input[data-color="${color}"]`);
+		if (input && document.activeElement !== input) {
+			input.value = label || '';
+		}
+		
+		// Recalculate dimensions if the label length might affect sizing
+		const uniqueColors = getUniqueGuestColors();
+		const dimensions = window.TablePlanner.calculateLegendDimensions ? 
+			window.TablePlanner.calculateLegendDimensions(uniqueColors) : null;
+		
+		if (dimensions) {
+			const legendSidebar = document.getElementById('legendSidebar');
+			if (legendSidebar) {
+				legendSidebar.style.width = dimensions.width + 'px';
+				legendSidebar.style.height = dimensions.height + 'px';
+			}
+			
+			// Update input width if needed
+			if (input) {
+				input.style.width = dimensions.inputWidth + 'px';
+			}
+			
+			// Update button position after dimensions change
+			// Use requestAnimationFrame to ensure DOM layout is complete
+			if (window.updateLegendButtonPosition) {
+				requestAnimationFrame(() => {
+					setTimeout(() => window.updateLegendButtonPosition(), 0);
+				});
+			}
+		}
+	}
 
 	function assignGuestToSeat(tableId, seatIndex, guestId) { pushHistory(); const table = state.tables.find(t => t.id === tableId); if (!table) return; if (seatIndex < 0 || seatIndex >= table.seats) return; for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === guestId) { delete t.assignments[k]; } } } table.assignments[String(seatIndex)] = guestId; save(); window.TablePlanner.render(); }
 	function unassignSeat(tableId, seatIndex) { pushHistory(); const table = state.tables.find(t => t.id === tableId); if (!table) return; delete table.assignments[String(seatIndex)]; save(); window.TablePlanner.render(); }
@@ -519,6 +601,10 @@
 		setGuestSort,
 		setGuestUnassignedOnly,
 		setGuestSearch,
+		// color legend
+		getUniqueGuestColors,
+		updateColorLegendLabel,
+		updateLegendInputValue,
 		assignGuestToSeat,
 		unassignSeat,
 		setTableSeats,

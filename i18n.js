@@ -1,6 +1,8 @@
 (function () {
 	const translations = {
 		en: {
+			// Page title
+			'pageTitle': 'Table Planner',
 			// Toolbar
 			'addCircleTableBtn': 'Add Circular Table',
 			'addRectTableBtn': 'Add Rectangular Table',
@@ -15,6 +17,8 @@
 
 			// Sidebar
 			'guestsTitle': 'Guests',
+			'legendTitle': 'Color Legend',
+			'toggleLegend': 'Toggle Color Legend',
 			'exportGuestsCsvBtn': 'Export Guests CSV',
 			'importGuestsCsvBtn': 'Import Guests CSV',
 			'selectPictureFolderBtn': 'Select Picture Folder',
@@ -81,6 +85,8 @@
 			'toggleSidebar': 'Toggle Sidebar'
 		},
 		bg: {
+			// Page title
+			'pageTitle': 'Планиране на маси',
 			// Toolbar
 			'addCircleTableBtn': 'Добави Кръгла Маса',
 			'addRectTableBtn': 'Добави Правоъгълна Маса',
@@ -95,6 +101,8 @@
 
 			// Sidebar
 			'guestsTitle': 'Гости',
+			'legendTitle': 'Легенда Цветове',
+			'toggleLegend': 'Превключи Легенда Цветове',
 			'exportGuestsCsvBtn': 'Експорт Гости CSV',
 			'importGuestsCsvBtn': 'Импорт Гости CSV',
 			'selectPictureFolderBtn': 'Избери Папка със Снимки',
@@ -177,6 +185,13 @@
 	function updateUI() {
 		const lang = window.TablePlanner?.state?.ui?.language || 'en';
 
+		// Update page title
+		const titleEl = document.querySelector('title[data-i18n]');
+		if (titleEl) {
+			const key = titleEl.getAttribute('data-i18n');
+			document.title = t(key);
+		}
+
 		// Update all elements with data-i18n attributes
 		document.querySelectorAll('[data-i18n]').forEach(el => {
 			const key = el.getAttribute('data-i18n');
@@ -184,7 +199,7 @@
 				el.value = t(key);
 			} else if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'number')) {
 				el.placeholder = t(key);
-			} else {
+			} else if (el.tagName !== 'TITLE') { // Skip title as it's handled above
 				el.textContent = t(key);
 			}
 		});

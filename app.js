@@ -21,6 +21,9 @@
 		// Sidebar toggle
 		document.getElementById('sidebarToggle').addEventListener('click', onSidebarToggle);
 
+		// Legend sidebar toggle
+		document.getElementById('legendToggle').addEventListener('click', onLegendToggle);
+
 		// Language toggle
 		document.getElementById('languageBtn').addEventListener('click', () => {
 			const currentLang = state.ui.language || 'en';
@@ -59,6 +62,7 @@
 		// Expose helpers for render()
 		window.updateCounts = updateCounts;
 		window.updateControlsVisibility = updateControlsVisibility;
+		window.updateLegendButtonPosition = updateLegendButtonPosition;
 
 		// Initial UI sync then render
 		syncGridControls();
@@ -68,10 +72,12 @@
 		updateCounts();
 		updateControlsVisibility();
 		updatePictureFolderStatus();
+		updateLegendButtonPosition(); // Initial button positioning
 		requestAnimationFrame(() => {
 			window.TablePlanner.render();
 			updateCounts();
 			updateControlsVisibility();
+			updateLegendButtonPosition(); // Update button position after render
 		});
 	}
 
@@ -299,6 +305,7 @@
 				window.TablePlanner.state.guests = Array.isArray(obj.guests) ? obj.guests : [];
 				window.TablePlanner.state.tables = Array.isArray(obj.tables) ? obj.tables : [];
 				window.TablePlanner.state.ui = Object.assign({ selectedTableId: null, zoom: 1, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 12, showGrid: true }, obj.ui || {});
+				window.TablePlanner.state.colorLegend = obj.colorLegend || {};
 				window.TablePlanner.save();
 				syncGridControls();
 				window.TablePlanner.render();
@@ -426,6 +433,65 @@
 		} else {
 			layout.classList.add('sidebar-collapsed');
 			window.TablePlanner.setSidebarCollapsed(true);
+		}
+		
+		// Update legend button position when main sidebar state changes
+		updateLegendButtonPosition();
+	}
+
+	function onLegendToggle() {
+		const legendSidebar = document.getElementById('legendSidebar');
+		const isOpen = legendSidebar.classList.contains('open');
+
+		if (isOpen) {
+			legendSidebar.classList.remove('open');
+		} else {
+			legendSidebar.classList.add('open');
+		}
+		
+		// Update button position after toggling
+		updateLegendButtonPosition();
+	}
+
+	function updateLegendButtonPosition() {
+		const legendToggle = document.getElementById('legendToggle');
+		const legendSidebar = document.getElementById('legendSidebar');
+		const layout = document.querySelector('.layout');
+		
+		if (!legendToggle || !legendSidebar) return;
+		
+		const isLegendOpen = legendSidebar.classList.contains('open');
+		const isMainSidebarCollapsed = layout.classList.contains('sidebar-collapsed');
+		
+		if (isLegendOpen) {
+			// When legend is open, position button above it
+			const legendHeight = legendSidebar.offsetHeight;
+			const appliedHeight = legendSidebar.style.height;
+			
+			// Parse the applied height to get the numeric value
+			const appliedHeightValue = appliedHeight ? parseInt(appliedHeight) : legendHeight;
+			
+			// Use the applied height if available, otherwise fall back to offsetHeight
+			const finalHeight = appliedHeightValue || legendHeight;
+			const buttonBottom = finalHeight + 30; // 20px from bottom + 10px gap
+			
+			legendToggle.style.bottom = buttonBottom + 'px';
+			
+			// Adjust right position based on main sidebar state
+			if (isMainSidebarCollapsed) {
+				legendToggle.style.right = '20px';
+			} else {
+				legendToggle.style.right = '420px';
+			}
+		} else {
+			// When legend is closed, use default position
+			legendToggle.style.bottom = '20px';
+			
+			if (isMainSidebarCollapsed) {
+				legendToggle.style.right = '20px';
+			} else {
+				legendToggle.style.right = '420px';
+			}
 		}
 	}
 

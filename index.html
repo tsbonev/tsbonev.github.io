@@ -4,7 +4,8 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Table Planner</title>
+	<title data-i18n="pageTitle">Table Planner</title>
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
 	<link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -46,6 +47,13 @@
 			<div id="canvas" class="canvas" tabindex="0"></div>
 		</section>
 		<button id="sidebarToggle" class="sidebar-toggle" data-i18n-attr="title:toggleSidebar"></button>
+		<button id="legendToggle" class="legend-toggle" data-i18n-attr="title:toggleLegend">🎨</button>
+		<aside id="legendSidebar" class="legend-sidebar">
+			<h2><span data-i18n="legendTitle">Color Legend</span></h2>
+			<div id="legendContent" class="legend-content">
+				<!-- Legend content will be populated here -->
+			</div>
+		</aside>
 		<aside id="sidebar" class="sidebar">
 			<h2><span data-i18n="guestsTitle">Guests</span> <span id="guestCounts" class="count-pill"></span></h2>
 			<div id="tableGuests" class="table-guests" style="display:none">

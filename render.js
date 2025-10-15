@@ -105,6 +105,7 @@
 		if (window.updateControlsVisibility) window.updateControlsVisibility();
 
 		renderGuestSidebar();
+		renderColorLegend();
 
 		// Show table guests for selected table
 		const selectedTableId = window.TablePlanner.state.ui.selectedTableId;
@@ -357,6 +358,186 @@
 		if (unassignedOnly) unassignedOnly.checked = !!window.TablePlanner.state.ui.guestUnassignedOnly;
 	}
 
+	function renderColorLegend() {
+		const legendContent = document.getElementById('legendContent');
+		if (!legendContent) return;
+
+		const uniqueColors = window.TablePlanner.getUniqueGuestColors();
+		
+		// Calculate optimal dimensions
+		const dimensions = calculateLegendDimensions(uniqueColors);
+		
+		// Apply dynamic sizing to the legend sidebar
+		const legendSidebar = document.getElementById('legendSidebar');
+		if (legendSidebar) {
+			legendSidebar.style.width = dimensions.width + 'px';
+			legendSidebar.style.height = dimensions.height + 'px';
+		}
+		
+		// Clear existing content
+		legendContent.innerHTML = '';
+
+		// Prevent drops on the legend itself
+		legendContent.addEventListener('dragover', (e) => {
+			e.preventDefault();
+		});
+
+		legendContent.addEventListener('drop', (e) => {
+			e.preventDefault();
+		});
+
+		if (uniqueColors.length === 0) {
+			const emptyMessage = document.createElement('div');
+			emptyMessage.className = 'legend-empty';
+			emptyMessage.textContent = 'No colors assigned yet';
+			emptyMessage.style.textAlign = 'center';
+			emptyMessage.style.color = '#666';
+			emptyMessage.style.fontStyle = 'italic';
+			emptyMessage.style.padding = '20px';
+			legendContent.appendChild(emptyMessage);
+			
+			// Update button position after content is rendered
+			if (window.updateLegendButtonPosition) {
+				// Use requestAnimationFrame to ensure DOM layout is complete
+				requestAnimationFrame(() => {
+					setTimeout(() => window.updateLegendButtonPosition(), 0);
+				});
+			}
+			return;
+		}
+
+		for (const color of uniqueColors) {
+			const legendItem = document.createElement('div');
+			legendItem.className = 'legend-item';
+			legendItem.style.display = 'flex';
+			legendItem.style.alignItems = 'center';
+			legendItem.style.gap = '12px';
+			legendItem.style.marginBottom = '8px';
+
+			// Color circle
+			const colorCircle = document.createElement('div');
+			colorCircle.className = 'legend-color-circle';
+			colorCircle.style.width = '24px';
+			colorCircle.style.height = '24px';
+			colorCircle.style.borderRadius = '50%';
+			colorCircle.style.backgroundColor = color;
+			colorCircle.style.border = '2px solid rgba(0, 0, 0, 0.1)';
+			colorCircle.style.flexShrink = '0';
+			colorCircle.draggable = true;
+			colorCircle.dataset.color = color;
+
+			// Label input
+			const labelInput = document.createElement('input');
+			labelInput.type = 'text';
+			labelInput.className = 'legend-label-input';
+			labelInput.value = window.TablePlanner.state.colorLegend[color] || '';
+			labelInput.placeholder = 'Enter label...';
+			labelInput.style.flex = '1';
+			labelInput.style.padding = '6px 8px';
+			labelInput.style.border = '1px solid #d1d5db';
+			labelInput.style.borderRadius = '4px';
+			labelInput.style.fontSize = '14px';
+			labelInput.style.width = dimensions.inputWidth + 'px';
+			labelInput.dataset.color = color;
+
+			// Add event listener for label changes
+			labelInput.addEventListener('input', (e) => {
+				const newLabel = e.target.value;
+				window.TablePlanner.updateColorLegendLabel(color, newLabel);
+			});
+
+			// Add event listener for blur to re-sort when user finishes editing
+			labelInput.addEventListener('blur', () => {
+				// Re-render the color legend to update the order after user finishes editing
+				if (window.TablePlanner && window.TablePlanner.renderColorLegend) {
+					window.TablePlanner.renderColorLegend();
+				}
+			});
+
+			// Add drag event listeners to color circle
+			colorCircle.addEventListener('dragstart', (e) => {
+				e.dataTransfer.setData('text/plain', color);
+				e.dataTransfer.setData('application/legend-color', 'true');
+				colorCircle.classList.add('dragging');
+			});
+
+			colorCircle.addEventListener('dragend', (e) => {
+				colorCircle.classList.remove('dragging');
+				// Remove all drop-target classes from table guest colors
+				const tableGuestsList = document.getElementById('tableGuestsList');
+				if (tableGuestsList) {
+					tableGuestsList.querySelectorAll('.guest-color').forEach(dot => {
+						dot.classList.remove('drop-target');
+					});
+				}
+			});
+
+			legendItem.appendChild(colorCircle);
+			legendItem.appendChild(labelInput);
+			legendContent.appendChild(legendItem);
+		}
+		
+		// Update button position after all content is rendered
+		if (window.updateLegendButtonPosition) {
+			// Use requestAnimationFrame to ensure DOM layout is complete
+			requestAnimationFrame(() => {
+				setTimeout(() => window.updateLegendButtonPosition(), 0);
+			});
+		}
+	}
+
+	function calculateLegendDimensions(uniqueColors) {
+		const canvasWrap = document.querySelector('.canvas-wrap');
+		const canvasHeight = canvasWrap ? canvasWrap.clientHeight : window.innerHeight - 100;
+		const canvasWidth = canvasWrap ? canvasWrap.clientWidth : window.innerWidth - 400;
+		
+		// Default dimensions
+		const defaultWidth = 300; // 3/4 of main sidebar width
+		const defaultHeight = Math.floor(canvasHeight * 0.33); // 1/3 of canvas height
+		const defaultInputWidth = 200; // Default input width
+		
+		// Calculate optimal input width based on content
+		let maxInputWidth = defaultInputWidth;
+		for (const color of uniqueColors) {
+			const label = window.TablePlanner.state.colorLegend[color] || '';
+			const placeholderLength = 'Enter label...'.length;
+			const contentLength = Math.max(label.length, placeholderLength);
+			
+			// Estimate width: ~8px per character + padding
+			const estimatedWidth = Math.max(contentLength * 8 + 16, 120); // Minimum 120px
+			maxInputWidth = Math.max(maxInputWidth, estimatedWidth);
+		}
+		
+		// Limit input width to 2x default width
+		const optimalInputWidth = Math.min(maxInputWidth, defaultInputWidth * 2);
+		
+		// Calculate total width: color circle + gap + input width + padding
+		const colorCircleWidth = 24;
+		const gap = 12;
+		const horizontalPadding = 32; // 16px on each side
+		const optimalWidth = colorCircleWidth + gap + optimalInputWidth + horizontalPadding;
+		
+		// Calculate optimal height based on number of colors
+		const headerHeight = 48; // Approximate header height
+		const itemHeight = 40; // Height per color item (including margin)
+		const padding = 24; // Top and bottom padding
+		const optimalHeight = headerHeight + (uniqueColors.length * itemHeight) + padding;
+		
+		// Limit height to 90% of canvas height
+		const maxHeight = Math.floor(canvasHeight * 0.9);
+		const finalHeight = Math.min(optimalHeight, maxHeight);
+		
+		// Ensure minimum dimensions
+		const finalWidth = Math.max(optimalWidth, 200);
+		const finalHeightMin = Math.max(finalHeight, 150);
+		
+		return {
+			width: finalWidth,
+			height: finalHeightMin,
+			inputWidth: optimalInputWidth
+		};
+	}
+
 	function buildGuestAssignmentIndex() {
 		const map = new Map();
 		for (const t of window.TablePlanner.state.tables) {
@@ -605,7 +786,11 @@
 		return ratio <= 1.05;
 	}
 
-	window.TablePlanner = Object.assign(window.TablePlanner || {}, { render });
+	window.TablePlanner = Object.assign(window.TablePlanner || {}, { 
+		render,
+		renderColorLegend,
+		calculateLegendDimensions
+	});
 	window.updateCounts = window.updateCounts || function () { };
 	window.updateControlsVisibility = window.updateControlsVisibility || function () { };
 })();
