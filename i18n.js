@@ -14,7 +14,8 @@
 			'redoBtn': 'Redo',
 			'exportBtn': 'Export Plan',
 			'importBtn': 'Import Plan',
-			'printBtn': 'Print Seating Chart',
+			'printSeatingChartBtn': 'Print Seating Chart',
+			'printBtn': 'Print Page',
 			'viewToggleBtn': 'Seating Chart',
 			'canvasViewBtn': 'Canvas View',
 
@@ -102,7 +103,9 @@
 			'tableSizeHeight': 'Height:',
 			'tieSizeToCanvasBtn': '📏 Tie to Canvas',
 			'tieSizeToCanvasBtnActive': '📏 Tied to Canvas',
-			'pixelsPerMeterLabel': 'Pixels per meter:'
+			'pixelsPerMeterLabel': 'Pixels per meter:',
+			'pageText': 'Page',
+			'canvasViewTitle': 'Table Layout'
 		},
 		bg: {
 			// Page title
@@ -118,8 +121,9 @@
 			'redoBtn': 'Повтори',
 			'exportBtn': 'Експорт План',
 			'importBtn': 'Импорт План',
-			'printBtn': 'Печат Схема на Маси',
-			'viewToggleBtn': 'Диаграма на Местата',
+			'printSeatingChartBtn': 'Печат Схема на Местата',
+			'printBtn': 'Печат Схема на Масите',
+			'viewToggleBtn': 'Схема на Местата',
 			'canvasViewBtn': 'Изглед на Канваса',
 
 			// Seating Chart
@@ -206,7 +210,9 @@
 			'tableSizeHeight': 'Височина:',
 			'tieSizeToCanvasBtn': '📏 Свържи с Canvas',
 			'tieSizeToCanvasBtnActive': '📏 Свързано с Canvas',
-			'pixelsPerMeterLabel': 'Пиксели на метър:'
+			'pixelsPerMeterLabel': 'Пиксели на метър:',
+			'pageText': 'Страница',
+			'canvasViewTitle': 'Схема на масите'
 		}
 	};
 

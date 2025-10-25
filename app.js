@@ -9,7 +9,12 @@
 		document.getElementById('exportBtn').addEventListener('click', onExport);
 		document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importInput').click());
 		document.getElementById('importInput').addEventListener('change', onImport);
-		document.getElementById('printBtn').addEventListener('click', onPrint);
+		document.getElementById('printSeatingChartBtn').addEventListener('click', () => {
+			printSeatingChart();
+		});
+		document.getElementById('printBtn').addEventListener('click', () => {
+			printCanvas();
+		});
 
 		document.getElementById('exportGuestsCsvBtn').addEventListener('click', onExportGuestsCsv);
 		document.getElementById('importGuestsCsvBtn').addEventListener('click', () => document.getElementById('importGuestsCsvInput').click());
@@ -176,6 +181,13 @@
 		if (snapLabel) snapLabel.style.display = isSeatingChartView ? 'none' : '';
 		if (gridSizeLabel) gridSizeLabel.style.display = isSeatingChartView ? 'none' : '';
 		if (showGridLabel) showGridLabel.style.display = isSeatingChartView ? 'none' : '';
+
+		// Hide/show print buttons based on view mode
+		const printBtn = document.getElementById('printBtn');
+		const printSeatingChartBtn = document.getElementById('printSeatingChartBtn');
+
+		if (printBtn) printBtn.style.display = isSeatingChartView ? 'none' : '';
+		if (printSeatingChartBtn) printSeatingChartBtn.style.display = isSeatingChartView ? '' : 'none';
 	}
 
 	function updateTieSizeButtonState() {
@@ -467,7 +479,7 @@
 		e.target.value = '';
 	}
 
-	function onPrint() {
+	function printSeatingChart() {
 		// Switch to seating chart view if not already there
 		const currentMode = window.TablePlanner.state.ui.viewMode;
 		if (currentMode !== 'seatingChart') {
@@ -476,14 +488,73 @@
 
 			// Wait for render to complete, then print
 			setTimeout(() => {
-				printSeatingChart();
+				printSeatingChartImpl();
 			}, 100);
 		} else {
-			printSeatingChart();
+			printSeatingChartImpl();
 		}
 	}
 
-	function printSeatingChart() {
+	function printCanvas() {
+		// Calculate scale to fit canvas to page
+		const canvas = document.getElementById('canvas');
+		if (!canvas) return;
+
+		// Create and add print heading
+		const printHeading = document.createElement('div');
+		printHeading.id = 'print-canvas-heading';
+		printHeading.style.cssText = `
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			background: white;
+			text-align: center;
+			padding: 20px 0;
+			font-size: 24px;
+			font-weight: bold;
+			color: #333;
+			border-bottom: 2px solid #333;
+			z-index: 10000;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		`;
+		printHeading.textContent = window.i18n.t('canvasViewTitle');
+		document.body.appendChild(printHeading);
+
+		// Get the actual canvas content dimensions, not the displayed dimensions
+		const canvasContentWidth = canvas.scrollWidth;
+		const canvasContentHeight = canvas.scrollHeight;
+
+		// Determine orientation based on canvas content aspect ratio
+		const isPortrait = canvasContentHeight > canvasContentWidth;
+
+		// Calculate scale factors for both dimensions
+		const pageWidth = window.innerWidth;
+		const pageHeight = window.innerHeight - 80; // Account for heading height
+		const scaleX = pageWidth / canvasContentWidth;
+		const scaleY = pageHeight / canvasContentHeight;
+
+		// Use the smaller scale to ensure the entire canvas fits
+		const scale = Math.min(scaleX, scaleY) * 0.9; // 0.9 for some margin
+
+		// Set the CSS custom property for the scale and orientation
+		document.documentElement.style.setProperty('--print-scale', scale);
+		document.documentElement.style.setProperty('--print-orientation', isPortrait ? 'portrait' : 'landscape');
+
+		// Print
+		window.print();
+
+		// Clean up: remove heading and reset properties
+		setTimeout(() => {
+			if (printHeading.parentNode) {
+				printHeading.parentNode.removeChild(printHeading);
+			}
+			document.documentElement.style.setProperty('--print-scale', '1');
+			document.documentElement.style.setProperty('--print-orientation', 'auto');
+		}, 1000);
+	}
+
+	function printSeatingChartImpl() {
 		// Create a print-optimized version of the seating chart
 		const printWindow = window.open('', '_blank');
 		const { state } = window.TablePlanner;
@@ -567,7 +638,7 @@
 						color: #333;
 					}
 					
-					.page-header .date {
+					.page-header .page-number {
 						margin-top: 3px;
 						font-size: 12px;
 						color: #666;
@@ -765,15 +836,13 @@
 
 			printHTML += `<div class="page">`;
 
-			// Add header only on first page
-			if (pageIndex === 0) {
-				printHTML += `
-					<div class="page-header">
-						<h1>${window.i18n.t('viewToggleBtn')}</h1>
-						<div class="date">${new Date().toLocaleDateString()}</div>
-					</div>
-				`;
-			}
+			// Add header to each page
+			printHTML += `
+				<div class="page-header">
+					<h1>${window.i18n.t('viewToggleBtn')}</h1>
+					<div class="page-number">${window.i18n.t('pageText')} ${pageIndex + 1} of ${totalPages}</div>
+				</div>
+			`;
 
 			printHTML += `<div class="tables-container">`;
 

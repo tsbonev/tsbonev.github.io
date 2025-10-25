@@ -1049,6 +1049,11 @@ button {
 
 /* Print styles for PDF export */
 @media print {
+	@page {
+		size: var(--print-orientation, auto);
+		margin: 0.5cm;
+	}
+
 	body {
 		margin: 0;
 	}
@@ -1058,16 +1063,57 @@ button {
 		display: none !important;
 	}
 
+	/* Hide all toggle buttons and interactive elements */
+	.sidebar-toggle,
+	.view-toggle,
+	.legend-toggle,
+	.legend-sidebar button,
+	.seating-chart button {
+		display: none !important;
+	}
+
 	.canvas-wrap {
 		position: static;
 		overflow: visible;
+		width: 100vw;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-top: 80px;
+		/* Account for print heading */
+		background: transparent !important;
+	}
+
+	#print-canvas-heading {
+		display: block !important;
+		position: fixed !important;
+		top: 0 !important;
+		left: 0 !important;
+		width: 100% !important;
+		background: white !important;
+		text-align: center !important;
+		padding: 20px 0 !important;
+		font-size: 24px !important;
+		font-weight: bold !important;
+		color: #333 !important;
+		border-bottom: 2px solid #333 !important;
+		z-index: 10000 !important;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 	}
 
 	.canvas {
-		min-width: auto;
-		min-height: auto;
-		width: 100vw;
-		height: 100vh;
+		transform-origin: center center !important;
+		transform: scale(var(--print-scale, 1)) !important;
+		border: 1px solid #333;
+		box-shadow: none;
+		background-color: transparent !important;
+		background-image: none !important;
+	}
+
+	/* Remove only the blue background from canvas-wrap and canvas, keep table colors */
+	.canvas-wrap {
+		background: transparent !important;
 	}
 }
 
