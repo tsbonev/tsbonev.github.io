@@ -457,8 +457,26 @@
 		const printWindow = window.open('', '_blank');
 		const { state } = window.TablePlanner;
 
-		// Filter out separators and only show actual tables
+		// Filter out separators and only show actual tables, then sort alphabetically
 		const actualTables = state.tables.filter(t => t.type === 'rect' || t.type === 'circle');
+
+		// Sort tables alphabetically by label, with natural sorting for numbers
+		actualTables.sort((a, b) => {
+			const labelA = String(a.label);
+			const labelB = String(b.label);
+
+			// Check if both labels are numeric
+			const isNumericA = !isNaN(labelA) && !isNaN(parseFloat(labelA));
+			const isNumericB = !isNaN(labelB) && !isNaN(parseFloat(labelB));
+
+			if (isNumericA && isNumericB) {
+				// Sort numerically
+				return parseFloat(labelA) - parseFloat(labelB);
+			} else {
+				// Sort alphabetically (case-insensitive)
+				return labelA.toLowerCase().localeCompare(labelB.toLowerCase());
+			}
+		});
 
 		if (actualTables.length === 0) {
 			alert(window.i18n.t('seatingChartNoTables'));
@@ -494,13 +512,10 @@
 					
 					.page {
 						width: 100%;
-						height: 100vh;
 						page-break-after: always;
 						page-break-inside: avoid;
-						display: flex;
-						flex-direction: column;
 						padding: 10px;
-						overflow: hidden;
+						overflow: visible;
 					}
 					
 					.page:last-child {
@@ -528,12 +543,9 @@
 					}
 					
 					.tables-container {
-						display: grid;
-						grid-template-columns: repeat(3, 1fr);
-						gap: 10px;
-						flex: 1;
-						height: calc(100vh - 60px);
-						overflow: hidden;
+						column-count: 3;
+						column-gap: 10px;
+						column-fill: balance;
 					}
 					
 					.table-card {
@@ -542,10 +554,11 @@
 						border-radius: 6px;
 						padding: 8px;
 						box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-						display: flex;
-						flex-direction: column;
-						overflow: hidden;
-						height: 100%;
+						display: block;
+						height: auto;
+						width: 100%;
+						break-inside: avoid;
+						margin-bottom: 10px;
 					}
 					
 					.table-card.round {
@@ -585,8 +598,7 @@
 						display: flex;
 						flex-direction: column;
 						gap: 2px;
-						flex: 1;
-						overflow-y: auto;
+						overflow-y: visible;
 					}
 					
 					.guest-item {
@@ -693,7 +705,7 @@
 						}
 						.page { 
 							page-break-after: always;
-							height: 100vh;
+							height: auto;
 						}
 						.page:last-child { 
 							page-break-after: avoid; 
@@ -711,8 +723,8 @@
 			<body>
 		`;
 
-		// Group tables into pages (3 per page)
-		const tablesPerPage = 3;
+		// Group tables into pages with more flexible layout
+		const tablesPerPage = 6; // Allow more tables per page for better space utilization
 		const totalPages = Math.ceil(actualTables.length / tablesPerPage);
 
 		for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
