@@ -72,6 +72,7 @@
 		// Expose helpers for render()
 		window.updateCounts = updateCounts;
 		window.updateControlsVisibility = updateControlsVisibility;
+		window.updateToolbarVisibility = updateToolbarVisibility;
 		window.updateLegendButtonPosition = updateLegendButtonPosition;
 
 		// Initial UI sync then render
@@ -82,12 +83,14 @@
 		window.TablePlanner.render();
 		updateCounts();
 		updateControlsVisibility();
+		updateToolbarVisibility();
 		updatePictureFolderStatus();
 		updateLegendButtonPosition(); // Initial button positioning
 		requestAnimationFrame(() => {
 			window.TablePlanner.render();
 			updateCounts();
 			updateControlsVisibility();
+			updateToolbarVisibility();
 			updateLegendButtonPosition(); // Update button position after render
 		});
 	}
@@ -145,6 +148,34 @@
 
 		// Update tie button state
 		updateTieSizeButtonState();
+	}
+
+	function updateToolbarVisibility() {
+		const s = window.TablePlanner.state;
+		const isSeatingChartView = s.ui.viewMode === 'seatingChart';
+
+		// Hide/show add table buttons
+		const addCircleBtn = document.getElementById('addCircleTableBtn');
+		const addRectBtn = document.getElementById('addRectTableBtn');
+		const addSeparatorBtn = document.getElementById('addSeparatorBtn');
+
+		if (addCircleBtn) addCircleBtn.style.display = isSeatingChartView ? 'none' : '';
+		if (addRectBtn) addRectBtn.style.display = isSeatingChartView ? 'none' : '';
+		if (addSeparatorBtn) addSeparatorBtn.style.display = isSeatingChartView ? 'none' : '';
+
+		// Hide/show grid controls
+		const snapToggle = document.getElementById('snapToggle');
+		const gridSizeInput = document.getElementById('gridSizeInput');
+		const showGridToggle = document.getElementById('showGridToggle');
+
+		// Find the parent labels/containers to hide the entire control
+		const snapLabel = snapToggle ? snapToggle.closest('label') : null;
+		const gridSizeLabel = gridSizeInput ? gridSizeInput.closest('label') : null;
+		const showGridLabel = showGridToggle ? showGridToggle.closest('label') : null;
+
+		if (snapLabel) snapLabel.style.display = isSeatingChartView ? 'none' : '';
+		if (gridSizeLabel) gridSizeLabel.style.display = isSeatingChartView ? 'none' : '';
+		if (showGridLabel) showGridLabel.style.display = isSeatingChartView ? 'none' : '';
 	}
 
 	function updateTieSizeButtonState() {
@@ -1017,6 +1048,9 @@
 			button.textContent = '📋';
 			button.title = window.i18n.t('viewToggleBtn');
 		}
+
+		// Update toolbar visibility based on new view mode
+		updateToolbarVisibility();
 
 		// Re-render
 		window.TablePlanner.render();
