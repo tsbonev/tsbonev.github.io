@@ -100,6 +100,11 @@
 			updateControlsVisibility();
 			updateToolbarVisibility();
 			updateLegendButtonPosition(); // Update button position after render
+
+			// Re-enable animations after initialization is complete
+			setTimeout(() => {
+				document.body.classList.remove('no-animations');
+			}, 100); // Small delay to ensure all initial state is set
 		});
 	}
 
@@ -186,6 +191,10 @@
 		if (snapLabel) snapLabel.style.display = isSeatingChartView ? 'none' : '';
 		if (gridSizeLabel) gridSizeLabel.style.display = isSeatingChartView ? 'none' : '';
 		if (showGridLabel) showGridLabel.style.display = isSeatingChartView ? 'none' : '';
+
+		// Hide/show zoom level
+		const zoomLevel = document.getElementById('zoomLevel');
+		if (zoomLevel) zoomLevel.style.display = isSeatingChartView ? 'none' : '';
 
 		// Hide/show print buttons based on view mode
 		const printBtn = document.getElementById('printBtn');

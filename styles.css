@@ -9,18 +9,46 @@ body {
 /* Toolbar layout regions */
 .toolbar {
 	display: grid;
-	grid-template-columns: 1fr auto 1fr;
-	align-items: center;
+	grid-template-columns: 1fr;
+	grid-template-rows: auto auto;
 	gap: 8px;
-	padding: 8px 12px;
+	padding: 10px 16px;
 	border-bottom: 1px solid #e0e0e0;
 	background: #fafafa;
+	min-height: 80px;
+}
+
+.toolbar .row {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	gap: 12px;
+}
+
+/* First row: table addition buttons on left, undo/redo/import/export on right */
+
+.toolbar .row.second {
+	/* Second row: grid controls on left, re-center in center, print buttons on right */
+	justify-items: center;
+}
+
+.toolbar .row.second .left {
+	justify-self: start;
+}
+
+.toolbar .row.second .center {
+	justify-self: center;
+}
+
+.toolbar .row.second .right {
+	justify-self: end;
 }
 
 .toolbar .left {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
+	flex-wrap: wrap;
 }
 
 .toolbar .center {
@@ -28,6 +56,7 @@ body {
 	align-items: center;
 	gap: 12px;
 	justify-content: center;
+	flex-wrap: wrap;
 }
 
 .toolbar .right {
@@ -35,6 +64,7 @@ body {
 	align-items: center;
 	gap: 8px;
 	justify-content: flex-end;
+	flex-wrap: wrap;
 }
 
 .toolbar .spacer {
@@ -70,34 +100,123 @@ body {
 	margin: 0 6px;
 }
 
-/* Re-center button in toolbar */
-.toolbar #recenterBtn {
-	background: #28a745;
-	border: 1px solid #28a745;
-	color: white;
+/* Button Groups Styling */
+
+/* Base button styles for toolbar */
+.toolbar button {
 	padding: 6px 12px;
-	border-radius: 4px;
-	font-size: 14px;
+	border-radius: 6px;
+	font-size: 13px;
 	font-weight: 500;
+	border: 1px solid;
+	cursor: pointer;
 	transition: all 0.2s ease;
+	white-space: nowrap;
+	min-height: 32px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 }
 
-.toolbar #recenterBtn:hover {
-	background: #218838;
-	border-color: #218838;
+.toolbar button:hover {
 	transform: translateY(-1px);
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.toolbar #recenterBtn:active {
+.toolbar button:active {
 	transform: translateY(0);
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Addition Buttons - Green theme */
+.toolbar #addCircleTableBtn,
+.toolbar #addRectTableBtn,
+.toolbar #addSeparatorBtn {
+	background: #22c55e;
+	border-color: #22c55e;
+	color: white;
+}
+
+.toolbar #addCircleTableBtn:hover,
+.toolbar #addRectTableBtn:hover,
+.toolbar #addSeparatorBtn:hover {
+	background: #16a34a;
+	border-color: #16a34a;
+}
+
+/* Re-center Canvas Button - Blue theme */
+.toolbar #recenterBtn {
+	background: #3b82f6;
+	border-color: #3b82f6;
+	color: white;
+}
+
+.toolbar #recenterBtn:hover {
+	background: #2563eb;
+	border-color: #2563eb;
+}
+
+/* Undo/Redo Buttons - Soft Red theme */
+.toolbar #undoBtn,
+.toolbar #redoBtn {
+	background: #f87171;
+	border-color: #f87171;
+	color: white;
+}
+
+.toolbar #undoBtn:hover,
+.toolbar #redoBtn:hover {
+	background: #ef4444;
+	border-color: #ef4444;
+}
+
+/* Import/Export Buttons - Purple theme */
+.toolbar #importBtn,
+.toolbar #exportBtn {
+	background: #8b5cf6;
+	border-color: #8b5cf6;
+	color: white;
+}
+
+.toolbar #importBtn:hover,
+.toolbar #exportBtn:hover {
+	background: #7c3aed;
+	border-color: #7c3aed;
+}
+
+/* Print Buttons - Dark Gray theme */
+.toolbar #printBtn,
+.toolbar #printSeatingChartBtn {
+	background: #374151;
+	border-color: #374151;
+	color: white;
+}
+
+.toolbar #printBtn:hover,
+.toolbar #printSeatingChartBtn:hover {
+	background: #1f2937;
+	border-color: #1f2937;
+}
+
+/* Language Toggle Button - Indigo theme */
+.toolbar #languageBtn {
+	background: #6366f1;
+	border-color: #6366f1;
+	color: white;
+	font-size: 16px;
+	padding: 4px 8px;
+	min-width: 40px;
+}
+
+.toolbar #languageBtn:hover {
+	background: #4f46e5;
+	border-color: #4f46e5;
 }
 
 .layout {
 	display: grid;
 	grid-template-columns: 1fr 400px;
-	height: calc(100% - 49px);
+	height: calc(100% - 89px);
 	position: relative;
 }
 
@@ -289,6 +408,13 @@ body {
 	flex-direction: column;
 }
 
+/* Disable animations during initial page load */
+.no-animations .legend-sidebar,
+.no-animations .sidebar-toggle,
+.no-animations .legend-toggle {
+	transition: none;
+}
+
 /* Adjust legend sidebar position when main sidebar is open */
 .layout:not(.sidebar-collapsed) .legend-sidebar {
 	right: 420px;
@@ -377,6 +503,13 @@ body {
 	background: #fff;
 	overflow: auto;
 	transition: all 0.3s ease;
+}
+
+/* Disable animations during initial page load */
+.no-animations .sidebar,
+.no-animations .sidebar-toggle,
+.no-animations .legend-toggle {
+	transition: none;
 }
 
 .layout.sidebar-collapsed .sidebar {
@@ -801,38 +934,110 @@ body {
 	min-width: 15px;
 }
 
-.table-size-controls button {
+/* Sidebar Button Styling */
+
+/* Base sidebar button styles */
+.sidebar button {
 	padding: 6px 12px;
-	border: 1px solid #d1d5db;
-	border-radius: 4px;
-	background: #ffffff;
-	font-size: 12px;
+	border-radius: 6px;
+	font-size: 13px;
 	font-weight: 500;
-	color: #374151;
+	border: 1px solid;
 	cursor: pointer;
-	margin-top: 4px;
 	transition: all 0.2s ease;
+	white-space: nowrap;
+	min-height: 32px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 }
 
-.table-size-controls button:hover {
-	background: #f9fafb;
-	border-color: #9ca3af;
+.sidebar button:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.table-size-controls button:active {
-	background: #f3f4f6;
-	border-color: #6b7280;
+.sidebar button:active {
+	transform: translateY(0);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.table-size-controls button.active {
+/* Picture folder buttons - Teal theme */
+.sidebar #selectPictureFolderBtn,
+.sidebar #scanPicturesBtn {
+	background: #14b8a6;
+	border-color: #14b8a6;
+	color: white;
+}
+
+.sidebar #selectPictureFolderBtn:hover,
+.sidebar #scanPicturesBtn:hover {
+	background: #0d9488;
+	border-color: #0d9488;
+}
+
+/* CSV buttons - Cyan theme */
+.sidebar #exportGuestsCsvBtn,
+.sidebar #importGuestsCsvBtn {
+	background: #06b6d4;
+	border-color: #06b6d4;
+	color: white;
+}
+
+.sidebar #exportGuestsCsvBtn:hover,
+.sidebar #importGuestsCsvBtn:hover {
+	background: #0891b2;
+	border-color: #0891b2;
+}
+
+/* Guest form submit button - Green theme */
+.sidebar #guestForm button[type="submit"] {
+	background: #22c55e;
+	border-color: #22c55e;
+	color: white;
+}
+
+.sidebar #guestForm button[type="submit"]:hover {
+	background: #16a34a;
+	border-color: #16a34a;
+}
+
+/* Apply seat count button - Blue theme */
+.sidebar #applySeatCountBtn {
 	background: #3b82f6;
-	color: #ffffff;
+	border-color: #3b82f6;
+	color: white;
+}
+
+.sidebar #applySeatCountBtn:hover {
+	background: #2563eb;
 	border-color: #2563eb;
 }
 
-.table-size-controls button.active:hover {
-	background: #2563eb;
-	border-color: #1d4ed8;
+/* Tie size to canvas button - Special toggle styling */
+.sidebar #tieSizeToCanvasBtn {
+	background: #6b7280;
+	border-color: #6b7280;
+	color: white;
+	transition: all 0.3s ease;
+}
+
+.sidebar #tieSizeToCanvasBtn:hover {
+	background: #4b5563;
+	border-color: #4b5563;
+}
+
+/* Tie size to canvas button when active/toggled */
+.sidebar #tieSizeToCanvasBtn.active {
+	background: #10b981;
+	border-color: #10b981;
+	box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.sidebar #tieSizeToCanvasBtn.active:hover {
+	background: #059669;
+	border-color: #059669;
+	box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
 }
 
 .rect-controls {
@@ -1058,6 +1263,64 @@ button {
 	cursor: pointer;
 }
 
+/* Responsive button adjustments */
+@media (max-width: 768px) {
+	.toolbar {
+		padding: 8px 12px;
+		gap: 6px;
+		min-height: 70px;
+	}
+
+	.toolbar .row {
+		gap: 8px;
+	}
+
+	.toolbar button {
+		padding: 4px 8px;
+		font-size: 12px;
+		min-height: 28px;
+	}
+
+	.toolbar .left,
+	.toolbar .center,
+	.toolbar .right {
+		gap: 6px;
+	}
+
+	.toolbar #languageBtn {
+		font-size: 14px;
+		padding: 2px 6px;
+		min-width: 36px;
+	}
+}
+
+@media (max-width: 480px) {
+	.toolbar {
+		grid-template-rows: auto auto;
+		gap: 4px;
+		padding: 6px 8px;
+		min-height: 60px;
+	}
+
+	.toolbar .row {
+		grid-template-columns: 1fr;
+		gap: 6px;
+	}
+
+	.toolbar .row .left,
+	.toolbar .row .center,
+	.toolbar .row .right {
+		justify-content: center;
+		width: 100%;
+	}
+
+	.toolbar button {
+		font-size: 11px;
+		padding: 3px 6px;
+		min-height: 26px;
+	}
+}
+
 /* remove old import label hack */
 .import-label {
 	display: none;
@@ -1175,23 +1438,40 @@ button {
 }
 
 .guest-pictures button {
-	padding: 8px 12px;
-	font-size: 14px;
-	border: 1px solid #dee2e6;
-	border-radius: 4px;
-	background: white;
+	padding: 6px 12px;
+	font-size: 13px;
+	font-weight: 500;
+	border: 1px solid;
+	border-radius: 6px;
 	cursor: pointer;
 	transition: all 0.2s ease;
+	white-space: nowrap;
+	min-height: 32px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: #14b8a6;
+	border-color: #14b8a6;
+	color: white;
 }
 
 .guest-pictures button:hover {
-	background: #f8f9fa;
-	border-color: #adb5bd;
+	background: #0d9488;
+	border-color: #0d9488;
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.guest-pictures button:active {
+	transform: translateY(0);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .guest-pictures button:disabled {
 	opacity: 0.6;
 	cursor: not-allowed;
+	background: #6b7280;
+	border-color: #6b7280;
 }
 
 .picture-folder-status {

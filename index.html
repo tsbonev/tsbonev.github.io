@@ -10,40 +10,50 @@
 	<link rel="stylesheet" href="styles.css" />
 </head>
 
-<body>
+<body class="no-animations">
 	<header class="toolbar">
-		<div class="left">
-			<div id="tableCount" class="count-pill" data-i18n="tableCount"></div>
-			<div id="seatCount" class="count-pill" data-i18n="seatCount">| Seats: 0</div>
-			<button id="addCircleTableBtn" data-i18n="addCircleTableBtn">Add Circle</button>
-			<button id="addRectTableBtn" data-i18n="addRectTableBtn">Add Rectangle</button>
-			<button id="addSeparatorBtn" data-i18n="addSeparatorBtn">Add Separator</button>
-			<button id="recenterBtn" data-i18n="recenterBtn">🎯 Re-center</button>
+		<div class="row first">
+			<div class="left">
+				<div id="tableCount" class="count-pill" data-i18n="tableCount"></div>
+				<div id="seatCount" class="count-pill" data-i18n="seatCount">| Seats: 0</div>
+				<button id="addCircleTableBtn" data-i18n="addCircleTableBtn">Add Circle</button>
+				<button id="addRectTableBtn" data-i18n="addRectTableBtn">Add Rectangle</button>
+				<button id="addSeparatorBtn" data-i18n="addSeparatorBtn">Add Separator</button>
+			</div>
+			<div class="center">
+			</div>
+			<div class="right">
+				<button id="undoBtn" data-i18n="undoBtn">Undo</button>
+				<button id="redoBtn" data-i18n="redoBtn">Redo</button>
+				<button id="exportBtn" data-i18n="exportBtn">Export Plan</button>
+				<button id="importBtn" type="button" data-i18n="importBtn">Import Plan</button>
+				<input type="file" id="importInput" accept="application/json" style="display:none" />
+				<button id="languageBtn" type="button">🇧🇬</button>
+			</div>
 		</div>
-		<div class="center">
-			<label class="snap">
-				<input type="checkbox" id="snapToggle" />
-				<span data-i18n="snapToggle">Snap</span>
-			</label>
-			<label class="grid-size">
-				<span data-i18n="gridSizeInput">Grid</span>
-				<input type="number" id="gridSizeInput" min="4" max="64" step="1" value="12" />
-			</label>
-			<label class="show-grid">
-				<input type="checkbox" id="showGridToggle" checked />
-				<span data-i18n="showGridToggle">Show Grid</span>
-			</label>
-			<div class="zoom-level" id="zoomLevel">100%</div>
-		</div>
-		<div class="right">
-			<button id="undoBtn" data-i18n="undoBtn">Undo</button>
-			<button id="redoBtn" data-i18n="redoBtn">Redo</button>
-			<button id="exportBtn" data-i18n="exportBtn">Export Plan</button>
-			<button id="importBtn" type="button" data-i18n="importBtn">Import Plan</button>
-			<input type="file" id="importInput" accept="application/json" style="display:none" />
-			<button id="printSeatingChartBtn" type="button" data-i18n="printSeatingChartBtn">🖨️ Print</button>
-			<button id="printBtn" type="button" data-i18n="printBtn">🖨️ Print Page</button>
-			<button id="languageBtn" type="button">🇧🇬</button>
+		<div class="row second">
+			<div class="left">
+				<label class="snap">
+					<input type="checkbox" id="snapToggle" />
+					<span data-i18n="snapToggle">Snap</span>
+				</label>
+				<label class="grid-size">
+					<span data-i18n="gridSizeInput">Grid</span>
+					<input type="number" id="gridSizeInput" min="4" max="64" step="1" value="12" />
+				</label>
+				<label class="show-grid">
+					<input type="checkbox" id="showGridToggle" checked />
+					<span data-i18n="showGridToggle">Show Grid</span>
+				</label>
+				<div class="zoom-level" id="zoomLevel">100%</div>
+				<button id="recenterBtn" data-i18n="recenterBtn">🎯 Re-center</button>
+			</div>
+			<div class="center">
+			</div>
+			<div class="right">
+				<button id="printSeatingChartBtn" type="button" data-i18n="printSeatingChartBtn">🖨️ Print</button>
+				<button id="printBtn" type="button" data-i18n="printBtn">🖨️ Print Page</button>
+			</div>
 		</div>
 	</header>
 	<main class="layout">
