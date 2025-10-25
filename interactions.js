@@ -513,6 +513,32 @@
 		window.TablePlanner.render();
 	}
 
+	function onCanvasWrapMouseDown(e) {
+		// Only handle panning in canvas view mode
+		if (window.TablePlanner.state.ui.viewMode !== 'canvas') {
+			return;
+		}
+
+		// Handle right-click or middle-click for panning
+		if (e.button === 2 || e.button === 1) { // Right mouse button or middle mouse button
+			e.preventDefault();
+			pan = {
+				startX: e.clientX,
+				startY: e.clientY,
+				startPanX: window.TablePlanner.state.ui.panX,
+				startPanY: window.TablePlanner.state.ui.panY
+			};
+			// Add panning class to canvas and canvas-wrap
+			const canvas = document.getElementById('canvas');
+			const canvasWrap = canvas.parentElement;
+			canvas.classList.add('panning');
+			canvasWrap.classList.add('panning');
+			document.addEventListener('mousemove', onPanMove);
+			document.addEventListener('mouseup', onPanUp);
+			document.addEventListener('contextmenu', (e) => e.preventDefault());
+		}
+	}
+
 	function onPanUp() {
 		if (!pan) return;
 		// Remove panning class from canvas and canvas-wrap
@@ -1204,11 +1230,51 @@
 		window.TablePlanner.render();
 	}
 
+	function onCanvasWrapWheel(e) {
+		// Only handle wheel events in canvas view mode
+		if (window.TablePlanner.state.ui.viewMode !== 'canvas') {
+			return;
+		}
+
+		e.preventDefault();
+		const delta = e.deltaY > 0 ? 0.9 : 1.1; // Zoom out or in
+		const currentZoom = window.TablePlanner.state.ui.zoom;
+		const newZoom = Math.max(0.1, Math.min(5, currentZoom * delta));
+
+		// Get mouse position relative to canvas-wrap
+		const canvasWrap = e.currentTarget;
+		const canvasWrapRect = canvasWrap.getBoundingClientRect();
+		const mouseX = e.clientX - canvasWrapRect.left;
+		const mouseY = e.clientY - canvasWrapRect.top;
+
+		// Calculate zoom point in canvas coordinates
+		const zoomPointX = (mouseX - window.TablePlanner.state.ui.panX) / currentZoom;
+		const zoomPointY = (mouseY - window.TablePlanner.state.ui.panY) / currentZoom;
+
+		// Update zoom
+		window.TablePlanner.setZoom(newZoom);
+
+		// Adjust pan to keep the zoom point under the mouse
+		const newPanX = mouseX - zoomPointX * newZoom;
+		const newPanY = mouseY - zoomPointY * newZoom;
+		window.TablePlanner.setPan(newPanX, newPanY);
+
+		window.TablePlanner.render();
+	}
+
 	function bindInteractions() {
 		if (interactionsBound) return; // Only bind once
 		const canvas = document.getElementById('canvas');
+		const canvasWrap = canvas.parentElement;
+
+		// Bind canvas-specific interactions (table selection, dragging, etc.)
 		canvas.addEventListener('mousedown', onCanvasMouseDown);
 		canvas.addEventListener('wheel', onCanvasWheel, { passive: false });
+
+		// Bind canvas-wrap interactions for panning and zooming outside canvas
+		canvasWrap.addEventListener('mousedown', onCanvasWrapMouseDown);
+		canvasWrap.addEventListener('wheel', onCanvasWrapWheel, { passive: false });
+
 		document.addEventListener('keydown', onKeyDown);
 		interactionsBound = true;
 	}

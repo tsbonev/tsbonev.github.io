@@ -119,6 +119,15 @@ body {
 	cursor: grabbing;
 }
 
+/* Only show grab cursor in canvas view mode */
+.layout:not(.sidebar-collapsed) .canvas-wrap {
+	cursor: grab;
+}
+
+.layout:not(.sidebar-collapsed) .canvas-wrap.panning {
+	cursor: grabbing;
+}
+
 .sidebar-toggle {
 	position: fixed;
 	top: 50%;
