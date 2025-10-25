@@ -856,10 +856,11 @@
 
 	function calculateCanvasBounds() {
 		let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-		const margin = 50;
+		const margin = 50; // Reduced from 100 to 50px padding around tables
 
 		if (window.TablePlanner.state.tables.length === 0) {
-			return { minX: 0, minY: 0, maxX: 800, maxY: 600 };
+			// Return reasonable default bounds that fit within viewport with padding
+			return { minX: -50, minY: -50, maxX: 550, maxY: 350 };
 		}
 
 		for (const table of window.TablePlanner.state.tables) {
@@ -882,12 +883,26 @@
 		const newMaxX = maxX + margin;
 		const newMaxY = maxY + margin;
 
-		// Allow shrinking but maintain stable origin to prevent jarring shifts
+		// Ensure minimum canvas size but don't force large defaults
+		const minWidth = 500; // Reduced from 600 to match smaller padding
+		const minHeight = 350; // Reduced from 400 to match smaller padding
+
+		const finalWidth = Math.max(newMaxX - newMinX, minWidth);
+		const finalHeight = Math.max(newMaxY - newMinY, minHeight);
+
+		// Ensure there's padding from the top-left corner (0,0)
+		const finalMinX = Math.min(newMinX, -margin); // Ensure padding from left edge
+		const finalMinY = Math.min(newMinY, -margin); // Ensure padding from top edge
+
+		// Calculate final max bounds based on the adjusted min and the actual content size
+		const finalMaxX = Math.max(newMaxX, finalMinX + finalWidth);
+		const finalMaxY = Math.max(newMaxY, finalMinY + finalHeight);
+
 		return {
-			minX: Math.min(0, newMinX), // Never go below 0
-			minY: Math.min(0, newMinY), // Never go below 0
-			maxX: Math.max(newMaxX, 800), // Ensure minimum width
-			maxY: Math.max(newMaxY, 600)  // Ensure minimum height
+			minX: finalMinX,
+			minY: finalMinY,
+			maxX: finalMaxX,
+			maxY: finalMaxY
 		};
 	}
 
