@@ -18,6 +18,7 @@
 			'printBtn': 'Print Page',
 			'viewToggleBtn': 'Seating Chart',
 			'canvasViewBtn': 'Canvas View',
+			'recenterBtn': 'Re-center Canvas',
 
 			// Seating Chart
 			'seatingChartNoTables': 'No tables to display',
@@ -125,6 +126,7 @@
 			'printBtn': 'Печат Схема на Масите',
 			'viewToggleBtn': 'Схема на Местата',
 			'canvasViewBtn': 'Изглед на Канваса',
+			'recenterBtn': 'Центрирай Канваса',
 
 			// Seating Chart
 			'seatingChartNoTables': 'Няма маси за показване',

@@ -543,6 +543,63 @@
 		window.TablePlanner.render();
 	}
 
+	function recenterCanvas() {
+		// Calculate the center of all tables
+		if (state.tables.length === 0) {
+			// If no tables, reset to default view
+			resetView();
+			return;
+		}
+
+		// Calculate bounds of all tables
+		let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+		for (const table of state.tables) {
+			if (table.type === 'circle') {
+				minX = Math.min(minX, table.x - table.radius);
+				minY = Math.min(minY, table.y - table.radius);
+				maxX = Math.max(maxX, table.x + table.radius);
+				maxY = Math.max(maxY, table.y + table.radius);
+			} else if (table.type === 'rect' || table.type === 'separator') {
+				minX = Math.min(minX, table.x - table.width / 2);
+				minY = Math.min(minY, table.y - table.height / 2);
+				maxX = Math.max(maxX, table.x + table.width / 2);
+				maxY = Math.max(maxY, table.y + table.height / 2);
+			}
+		}
+
+		// Calculate center point
+		const centerX = (minX + maxX) / 2;
+		const centerY = (minY + maxY) / 2;
+
+		// Calculate content dimensions
+		const contentWidth = maxX - minX;
+		const contentHeight = maxY - minY;
+
+		// Get canvas-wrap dimensions (approximate)
+		const canvasWrap = document.querySelector('.canvas-wrap');
+		const wrapWidth = canvasWrap ? canvasWrap.clientWidth : 800;
+		const wrapHeight = canvasWrap ? canvasWrap.clientHeight : 600;
+
+		// Calculate optimal zoom to fit content with some margin
+		const margin = 50;
+		const zoomX = (wrapWidth - margin * 2) / contentWidth;
+		const zoomY = (wrapHeight - margin * 2) / contentHeight;
+		const optimalZoom = Math.min(zoomX, zoomY, 2); // Cap at 2x zoom
+
+		// Calculate pan to center the content
+		const panX = wrapWidth / 2 - centerX * optimalZoom;
+		const panY = wrapHeight / 2 - centerY * optimalZoom;
+
+		// Apply the new view
+		state.ui.zoom = Math.max(0.1, optimalZoom);
+		state.ui.panX = panX;
+		state.ui.panY = panY;
+
+		save();
+		window.TablePlanner.render();
+	}
+
 	function setSidebarCollapsed(collapsed) {
 		state.ui.sidebarCollapsed = !!collapsed;
 		save();
@@ -677,6 +734,7 @@
 		setZoom,
 		setPan,
 		resetView,
+		recenterCanvas,
 		// sidebar
 		setSidebarCollapsed,
 		setPixelsPerMeter,

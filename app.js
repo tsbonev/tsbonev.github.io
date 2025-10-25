@@ -30,6 +30,9 @@
 		// Legend sidebar toggle
 		document.getElementById('legendToggle').addEventListener('click', onLegendToggle);
 
+		// Re-center button
+		document.getElementById('recenterBtn').addEventListener('click', onRecenterCanvas);
+
 		// Language toggle
 		document.getElementById('languageBtn').addEventListener('click', () => {
 			const currentLang = state.ui.language || 'en';
@@ -163,10 +166,12 @@
 		const addCircleBtn = document.getElementById('addCircleTableBtn');
 		const addRectBtn = document.getElementById('addRectTableBtn');
 		const addSeparatorBtn = document.getElementById('addSeparatorBtn');
+		const recenterBtn = document.getElementById('recenterBtn');
 
 		if (addCircleBtn) addCircleBtn.style.display = isSeatingChartView ? 'none' : '';
 		if (addRectBtn) addRectBtn.style.display = isSeatingChartView ? 'none' : '';
 		if (addSeparatorBtn) addSeparatorBtn.style.display = isSeatingChartView ? 'none' : '';
+		if (recenterBtn) recenterBtn.style.display = isSeatingChartView ? 'none' : '';
 
 		// Hide/show grid controls
 		const snapToggle = document.getElementById('snapToggle');
@@ -1102,6 +1107,10 @@
 		updateLegendButtonPosition();
 	}
 
+	function onRecenterCanvas() {
+		window.TablePlanner.recenterCanvas();
+	}
+
 	function onViewToggle() {
 		const currentMode = window.TablePlanner.state.ui.viewMode;
 		const newMode = currentMode === 'canvas' ? 'seatingChart' : 'canvas';
@@ -1124,6 +1133,7 @@
 		// Re-render
 		window.TablePlanner.render();
 	}
+
 
 	function updateLegendButtonPosition() {
 		const legendToggle = document.getElementById('legendToggle');
