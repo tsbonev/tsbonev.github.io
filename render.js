@@ -80,43 +80,31 @@
 		canvas.innerHTML = '';
 
 		// Calculate dynamic canvas bounds based on table positions
-		let minX = 0, minY = 0, maxX = 1400, maxY = 900;
-		const margin = 200; // Extra margin around tables
+		const bounds = calculateCanvasBounds();
+		const canvasWidth = bounds.maxX - bounds.minX;
+		const canvasHeight = bounds.maxY - bounds.minY;
 
-		for (const table of window.TablePlanner.state.tables) {
-			if (table.type === 'circle') {
-				minX = Math.min(minX, table.x - table.radius - margin);
-				minY = Math.min(minY, table.y - table.radius - margin);
-				maxX = Math.max(maxX, table.x + table.radius + margin);
-				maxY = Math.max(maxY, table.y + table.radius + margin);
-			} else if (table.type === 'separator' || table.type === 'rect') {
-				minX = Math.min(minX, table.x - table.width / 2 - margin);
-				minY = Math.min(minY, table.y - table.height / 2 - margin);
-				maxX = Math.max(maxX, table.x + table.width / 2 + margin);
-				maxY = Math.max(maxY, table.y + table.height / 2 + margin);
-			}
-		}
-
-		// Ensure minimum canvas size and make it stable
-		const canvasWidth = Math.max(1400, maxX - minX);
-		const canvasHeight = Math.max(900, maxY - minY);
-
-		// Set canvas size - position at (0,0) for stability
+		// Set canvas size to fit tightly around tables
 		canvas.style.width = canvasWidth + 'px';
 		canvas.style.height = canvasHeight + 'px';
 		canvas.style.left = '0px';
 		canvas.style.top = '0px';
+
+		// Apply transform to shift the canvas content to fit the bounds
+		// Translate to account for negative minX/minY values
+		const translateX = bounds.minX < 0 ? -bounds.minX : 0;
+		const translateY = bounds.minY < 0 ? -bounds.minY : 0;
 
 		// Use base grid size
 		const baseGridSize = window.TablePlanner.state.ui.grid || 12;
 		canvas.style.setProperty('--grid', baseGridSize + 'px');
 		canvas.style.backgroundImage = window.TablePlanner.state.ui.showGrid === false ? 'none' : '';
 
-		// Apply zoom and pan transforms
+		// Apply zoom, pan, and bounds transforms
 		const zoom = window.TablePlanner.state.ui.zoom || 1;
 		const panX = window.TablePlanner.state.ui.panX || 0;
 		const panY = window.TablePlanner.state.ui.panY || 0;
-		canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+		canvas.style.transform = `translate(${panX + translateX}px, ${panY + translateY}px) scale(${zoom})`;
 
 		// Update zoom level display
 		const zoomLevelEl = document.getElementById('zoomLevel');
@@ -864,6 +852,43 @@
 		sizeDisplay.textContent = `${table.size.width.toFixed(1)}${unit} x ${table.size.height.toFixed(1)}${unit}`;
 
 		return sizeDisplay;
+	}
+
+	function calculateCanvasBounds() {
+		let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+		const margin = 50;
+
+		if (window.TablePlanner.state.tables.length === 0) {
+			return { minX: 0, minY: 0, maxX: 800, maxY: 600 };
+		}
+
+		for (const table of window.TablePlanner.state.tables) {
+			if (table.type === 'circle') {
+				minX = Math.min(minX, table.x - table.radius);
+				minY = Math.min(minY, table.y - table.radius);
+				maxX = Math.max(maxX, table.x + table.radius);
+				maxY = Math.max(maxY, table.y + table.radius);
+			} else if (table.type === 'separator' || table.type === 'rect') {
+				minX = Math.min(minX, table.x - table.width / 2);
+				minY = Math.min(minY, table.y - table.height / 2);
+				maxX = Math.max(maxX, table.x + table.width / 2);
+				maxY = Math.max(maxY, table.y + table.height / 2);
+			}
+		}
+
+		// Calculate bounds based on table positions
+		const newMinX = minX - margin;
+		const newMinY = minY - margin;
+		const newMaxX = maxX + margin;
+		const newMaxY = maxY + margin;
+
+		// Allow shrinking but maintain stable origin to prevent jarring shifts
+		return {
+			minX: Math.min(0, newMinX), // Never go below 0
+			minY: Math.min(0, newMinY), // Never go below 0
+			maxX: Math.max(newMaxX, 800), // Ensure minimum width
+			maxY: Math.max(newMaxY, 600)  // Ensure minimum height
+		};
 	}
 
 	function renderCircle(canvas, table, isSelected) {

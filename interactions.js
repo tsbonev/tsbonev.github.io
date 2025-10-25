@@ -45,9 +45,32 @@
 	}
 
 	function clampPosition(t, x, y) {
-		// Don't clamp position - allow tables to move anywhere
-		// The canvas will expand dynamically to accommodate them
-		return { x, y };
+		// Get canvas bounds to constrain table movement
+		const canvas = document.getElementById('canvas');
+		if (!canvas) return { x, y };
+
+		const canvasWidth = parseInt(canvas.style.width) || 800;
+		const canvasHeight = parseInt(canvas.style.height) || 600;
+
+		// Calculate table bounds based on type
+		let tableWidth, tableHeight;
+		if (t.type === 'circle') {
+			tableWidth = t.radius * 2;
+			tableHeight = t.radius * 2;
+		} else {
+			tableWidth = t.width;
+			tableHeight = t.height;
+		}
+
+		// Calculate table's bounding box
+		const halfWidth = tableWidth / 2;
+		const halfHeight = tableHeight / 2;
+
+		// Clamp position to keep table within canvas bounds
+		const clampedX = Math.max(halfWidth, Math.min(x, canvasWidth - halfWidth));
+		const clampedY = Math.max(halfHeight, Math.min(y, canvasHeight - halfHeight));
+
+		return { x: clampedX, y: clampedY };
 	}
 
 	function getTableBounds(table) {
