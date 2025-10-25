@@ -191,7 +191,7 @@
 
 		const title = document.createElement('h3');
 		title.className = 'table-card-title';
-		title.textContent = table.label;
+		title.textContent = formatTableName(table.label);
 
 		const seats = document.createElement('div');
 		seats.className = 'table-card-seats';
@@ -350,6 +350,16 @@
 		const parts = name.trim().split(/\s+/);
 		if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
 		return (parts[0][0] + parts[1][0]).toUpperCase();
+	}
+
+	function formatTableName(label) {
+		const labelStr = String(label);
+		const isNumeric = !isNaN(labelStr) && !isNaN(parseFloat(labelStr));
+		if (isNumeric) {
+			return window.i18n.t('tableTitle', { label: labelStr });
+		} else {
+			return labelStr;
+		}
 	}
 
 	function applySeatVisual(seatEl, table, index) {

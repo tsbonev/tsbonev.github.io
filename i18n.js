@@ -14,6 +14,7 @@
 			'redoBtn': 'Redo',
 			'exportBtn': 'Export Plan',
 			'importBtn': 'Import Plan',
+			'printBtn': 'Print Seating Chart',
 			'viewToggleBtn': 'Seating Chart',
 			'canvasViewBtn': 'Canvas View',
 
@@ -117,6 +118,7 @@
 			'redoBtn': 'Повтори',
 			'exportBtn': 'Експорт План',
 			'importBtn': 'Импорт План',
+			'printBtn': 'Печат Схема на Маси',
 			'viewToggleBtn': 'Диаграма на Местата',
 			'canvasViewBtn': 'Изглед на Канваса',
 

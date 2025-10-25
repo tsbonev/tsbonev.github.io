@@ -857,6 +857,16 @@
 		return (parts[0][0] + parts[1][0]).toUpperCase();
 	}
 
+	function formatTableName(label) {
+		const labelStr = String(label);
+		const isNumeric = !isNaN(labelStr) && !isNaN(parseFloat(labelStr));
+		if (isNumeric) {
+			return window.i18n.t('tableTitle', { label: labelStr });
+		} else {
+			return labelStr;
+		}
+	}
+
 	function showTableGuests(tableId) {
 		const tableGuestsEl = document.getElementById('tableGuests');
 		const tableGuestsListEl = document.getElementById('tableGuestsList');
@@ -872,13 +882,8 @@
 		// Update the title dynamically based on table label
 		const titleEl = tableGuestsEl.querySelector('h3');
 		if (titleEl) {
-			const label = String(table.label);
-			const isNumeric = !isNaN(label) && !isNaN(parseFloat(label));
-			if (isNumeric) {
-				titleEl.textContent = `Гости на Маса ${label}`;
-			} else {
-				titleEl.textContent = `Гости на ${label}`;
-			}
+			const formattedName = formatTableName(table.label);
+			titleEl.textContent = `${window.i18n.t('tableGuestsTitle')} - ${formattedName}`;
 		}
 
 		// Clear existing content
@@ -1059,12 +1064,12 @@
 				e.target.classList.remove('drop-target');
 
 				const isLegendColor = e.dataTransfer.types.includes('application/legend-color');
-				
+
 				if (isLegendColor) {
 					// Drop from legend - apply the color to the target guest
 					const color = e.dataTransfer.getData('text/plain');
 					const targetGuestId = e.target.dataset.guestId;
-					
+
 					if (color && targetGuestId) {
 						window.TablePlanner.updateGuest(targetGuestId, { color: color });
 					}

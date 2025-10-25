@@ -9,6 +9,7 @@
 		document.getElementById('exportBtn').addEventListener('click', onExport);
 		document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importInput').click());
 		document.getElementById('importInput').addEventListener('change', onImport);
+		document.getElementById('printBtn').addEventListener('click', onPrint);
 
 		document.getElementById('exportGuestsCsvBtn').addEventListener('click', onExportGuestsCsv);
 		document.getElementById('importGuestsCsvBtn').addEventListener('click', () => document.getElementById('importGuestsCsvInput').click());
@@ -433,6 +434,427 @@
 		reader.readAsText(file);
 		// reset so selecting the same file again will fire change
 		e.target.value = '';
+	}
+
+	function onPrint() {
+		// Switch to seating chart view if not already there
+		const currentMode = window.TablePlanner.state.ui.viewMode;
+		if (currentMode !== 'seatingChart') {
+			window.TablePlanner.setViewMode('seatingChart');
+			window.TablePlanner.render();
+
+			// Wait for render to complete, then print
+			setTimeout(() => {
+				printSeatingChart();
+			}, 100);
+		} else {
+			printSeatingChart();
+		}
+	}
+
+	function printSeatingChart() {
+		// Create a print-optimized version of the seating chart
+		const printWindow = window.open('', '_blank');
+		const { state } = window.TablePlanner;
+
+		// Filter out separators and only show actual tables
+		const actualTables = state.tables.filter(t => t.type === 'rect' || t.type === 'circle');
+
+		if (actualTables.length === 0) {
+			alert(window.i18n.t('seatingChartNoTables'));
+			return;
+		}
+
+		// Create HTML for print with explicit page breaks
+		let printHTML = `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="UTF-8">
+				<title>${window.i18n.t('viewToggleBtn')} - ${new Date().toLocaleDateString()}</title>
+				<style>
+					@page {
+						size: A4;
+						margin: 0.5cm;
+					}
+					
+					* {
+						box-sizing: border-box;
+					}
+					
+					body {
+						font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+						margin: 0;
+						padding: 0;
+						background: white;
+						color: black;
+						font-size: 12px;
+						line-height: 1.2;
+					}
+					
+					.page {
+						width: 100%;
+						height: 100vh;
+						page-break-after: always;
+						page-break-inside: avoid;
+						display: flex;
+						flex-direction: column;
+						padding: 10px;
+						overflow: hidden;
+					}
+					
+					.page:last-child {
+						page-break-after: avoid;
+					}
+					
+					.page-header {
+						text-align: center;
+						margin-bottom: 15px;
+						padding-bottom: 8px;
+						border-bottom: 2px solid #333;
+						flex-shrink: 0;
+					}
+					
+					.page-header h1 {
+						margin: 0;
+						font-size: 18px;
+						color: #333;
+					}
+					
+					.page-header .date {
+						margin-top: 3px;
+						font-size: 12px;
+						color: #666;
+					}
+					
+					.tables-container {
+						display: grid;
+						grid-template-columns: repeat(3, 1fr);
+						gap: 10px;
+						flex: 1;
+						height: calc(100vh - 60px);
+						overflow: hidden;
+					}
+					
+					.table-card {
+						background: white;
+						border: 2px solid #333;
+						border-radius: 6px;
+						padding: 8px;
+						box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+						display: flex;
+						flex-direction: column;
+						overflow: hidden;
+						height: 100%;
+					}
+					
+					.table-card.round {
+						border-left: 3px solid #28a745;
+					}
+					
+					.table-card.rect {
+						border-left: 3px solid #007bff;
+					}
+					
+					.table-header {
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+						margin-bottom: 6px;
+						padding-bottom: 4px;
+						border-bottom: 1px solid #ccc;
+						flex-shrink: 0;
+					}
+					
+					.table-title {
+						font-size: 12px;
+						font-weight: 600;
+						color: #333;
+						margin: 0;
+					}
+					
+					.table-seats {
+						font-size: 9px;
+						color: #666;
+						background: #f8f9fa;
+						padding: 2px 4px;
+						border-radius: 2px;
+					}
+					
+					.table-guests {
+						display: flex;
+						flex-direction: column;
+						gap: 2px;
+						flex: 1;
+						overflow-y: auto;
+					}
+					
+					.guest-item {
+						display: flex;
+						align-items: center;
+						gap: 4px;
+						padding: 3px;
+						background: #f8f9fa;
+						border-radius: 2px;
+						border-left: 2px solid transparent;
+						font-size: 9px;
+					}
+					
+					.guest-item.assigned {
+						background: #fff;
+						border-left-color: #007bff;
+					}
+					
+					.guest-seat {
+						font-size: 8px;
+						font-weight: 600;
+						color: #666;
+						min-width: 16px;
+						text-align: center;
+					}
+					
+					.guest-picture {
+						width: 16px;
+						height: 16px;
+						border-radius: 50%;
+						flex-shrink: 0;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						font-size: 7px;
+						font-weight: 600;
+						color: white;
+					}
+					
+					.guest-picture.child {
+						border-radius: 0 0 50% 50%;
+					}
+					
+					.guest-info {
+						flex: 1;
+						min-width: 0;
+					}
+					
+					.guest-name {
+						font-size: 8px;
+						font-weight: 500;
+						color: #333;
+						margin: 0;
+						white-space: nowrap;
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+					
+					.guest-child {
+						font-size: 7px;
+						color: #ff6b35;
+						font-weight: 500;
+						margin-top: 1px;
+					}
+					
+					.empty-seat {
+						display: flex;
+						align-items: center;
+						gap: 4px;
+						padding: 3px;
+						background: #f8f9fa;
+						border-radius: 2px;
+						border: 1px dashed #ccc;
+						color: #6c757d;
+						font-size: 8px;
+					}
+					
+					.empty-seat-icon {
+						width: 16px;
+						height: 16px;
+						border-radius: 50%;
+						background: #e9ecef;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						font-size: 8px;
+						color: #6c757d;
+					}
+					
+					.table-footer {
+						margin-top: 4px;
+						padding-top: 4px;
+						border-top: 1px solid #e9ecef;
+						font-size: 8px;
+						color: #666;
+						text-align: center;
+						flex-shrink: 0;
+					}
+					
+					@media print {
+						body { 
+							-webkit-print-color-adjust: exact; 
+							print-color-adjust: exact; 
+						}
+						.page { 
+							page-break-after: always;
+							height: 100vh;
+						}
+						.page:last-child { 
+							page-break-after: avoid; 
+						}
+						.table-card { 
+							break-inside: avoid;
+							page-break-inside: avoid;
+						}
+						.tables-container {
+							page-break-inside: avoid;
+						}
+					}
+				</style>
+			</head>
+			<body>
+		`;
+
+		// Group tables into pages (3 per page)
+		const tablesPerPage = 3;
+		const totalPages = Math.ceil(actualTables.length / tablesPerPage);
+
+		for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+			const startIndex = pageIndex * tablesPerPage;
+			const endIndex = Math.min(startIndex + tablesPerPage, actualTables.length);
+			const pageTables = actualTables.slice(startIndex, endIndex);
+
+			printHTML += `<div class="page">`;
+
+			// Add header only on first page
+			if (pageIndex === 0) {
+				printHTML += `
+					<div class="page-header">
+						<h1>${window.i18n.t('viewToggleBtn')}</h1>
+						<div class="date">${new Date().toLocaleDateString()}</div>
+					</div>
+				`;
+			}
+
+			printHTML += `<div class="tables-container">`;
+
+			for (const table of pageTables) {
+				printHTML += createPrintTableCard(table);
+			}
+
+			printHTML += `</div></div>`;
+		}
+
+		printHTML += `</body></html>`;
+
+		printWindow.document.write(printHTML);
+		printWindow.document.close();
+
+		// Wait for content to load, then print
+		printWindow.onload = () => {
+			setTimeout(() => {
+				printWindow.print();
+				printWindow.close();
+			}, 500);
+		};
+	}
+
+	function createPrintTableCard(table) {
+		const tableType = table.type === 'circle' ? 'round' : 'rect';
+		const tableTypeLabel = table.type === 'circle' ? window.i18n.t('tableTypeRound') : window.i18n.t('tableTypeRectangle');
+
+		let html = `
+			<div class="table-card ${tableType}">
+				<div class="table-header">
+					<h3 class="table-title">${formatTableName(table.label)}</h3>
+					<div class="table-seats">${table.seats} ${window.i18n.t('seatsLabel')} • ${tableTypeLabel}</div>
+				</div>
+				<div class="table-guests">
+		`;
+
+		// Create seat assignments array
+		const seatAssignments = [];
+		for (let i = 0; i < table.seats; i++) {
+			const guestId = table.assignments && table.assignments[String(i)];
+			seatAssignments.push({ seatNumber: i + 1, guestId });
+		}
+
+		// Sort by seat number
+		seatAssignments.sort((a, b) => a.seatNumber - b.seatNumber);
+
+		// Create guest elements
+		for (const assignment of seatAssignments) {
+			if (assignment.guestId) {
+				const guest = getGuestById(assignment.guestId);
+				if (guest) {
+					html += `
+						<div class="guest-item assigned">
+							<div class="guest-seat">${assignment.seatNumber}</div>
+							<div class="guest-picture ${guest.isChild ? 'child' : ''}" style="background-color: ${guest.color || '#6aa9ff'}">
+								${getInitials(guest.name)}
+							</div>
+							<div class="guest-info">
+								<div class="guest-name">${guest.name}</div>
+								${guest.isChild ? `<div class="guest-child">${window.i18n.t('guestChildLabel')}</div>` : ''}
+							</div>
+						</div>
+					`;
+				} else {
+					html += `
+						<div class="empty-seat">
+							<div class="empty-seat-icon">${assignment.seatNumber}</div>
+							<div>${window.i18n.t('emptySeat')}</div>
+						</div>
+					`;
+				}
+			} else {
+				html += `
+					<div class="empty-seat">
+						<div class="empty-seat-icon">${assignment.seatNumber}</div>
+						<div>${window.i18n.t('emptySeat')}</div>
+					</div>
+				`;
+			}
+		}
+
+		const assignedCount = seatAssignments.filter(a => a.guestId).length;
+		const childCount = seatAssignments.filter(a => {
+			const guest = getGuestById(a.guestId);
+			return guest && guest.isChild;
+		}).length;
+
+		let summaryText = `${assignedCount}/${table.seats} ${window.i18n.t('assignedLabel')}`;
+		if (childCount > 0) {
+			summaryText += ` • ${childCount} ${window.i18n.t('childrenLabel')}`;
+		}
+
+		html += `
+				</div>
+				<div class="table-footer">${summaryText}</div>
+			</div>
+		`;
+
+		return html;
+	}
+
+	function getGuestById(id) {
+		return window.TablePlanner.state.guests.find(g => g.id === id);
+	}
+
+	function getInitials(name) {
+		if (!name) return '';
+		const caps = (name.match(/[A-Z]/g) || []).join('');
+		if (caps.length >= 2) return caps.slice(0, 2);
+		if (caps.length === 1) return caps;
+		const parts = name.trim().split(/\s+/);
+		if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+		return (parts[0][0] + parts[1][0]).toUpperCase();
+	}
+
+	function formatTableName(label) {
+		const labelStr = String(label);
+		const isNumeric = !isNaN(labelStr) && !isNaN(parseFloat(labelStr));
+		if (isNumeric) {
+			return window.i18n.t('tableTitle', { label: labelStr });
+		} else {
+			return labelStr;
+		}
 	}
 
 	function onExportGuestsCsv() {
