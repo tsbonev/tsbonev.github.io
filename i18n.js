@@ -3,6 +3,8 @@
 		en: {
 			// Page title
 			'pageTitle': 'Table Planner',
+			// Language button
+			'languageBtn': '🇺🇸',
 			// Toolbar
 			'addCircleTableBtn': '⭕ Add Circular Table',
 			'addRectTableBtn': '⬜ Add Rectangular Table',
@@ -111,6 +113,8 @@
 		bg: {
 			// Page title
 			'pageTitle': 'Планиране на маси',
+			// Language button
+			'languageBtn': '🇧🇬',
 			// Toolbar
 			'addCircleTableBtn': '⭕ Добави Кръгла Маса',
 			'addRectTableBtn': '⬜ Добави Правоъгълна Маса',

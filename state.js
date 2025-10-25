@@ -7,7 +7,7 @@
 			version: 1,
 			guests: [],
 			tables: [],
-			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg', sidebarCollapsed: false, pixelsPerMeter: 100, viewMode: 'canvas' },
+			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0, guestSort: 'unassignedFirst', guestUnassignedOnly: true, snap: false, grid: 64, showGrid: true, language: 'bg', sidebarCollapsed: false, pixelsPerMeter: 100, viewMode: 'canvas' },
 			pictures: { folderPath: null, folderHandle: null, imageCache: {} },
 			colorLegend: {}, // Maps color hex codes to custom labels
 			_history: { past: [], future: [], suppress: false }
@@ -21,7 +21,7 @@
 		if (obj.ui.panX === undefined) obj.ui.panX = 0;
 		if (obj.ui.panY === undefined) obj.ui.panY = 0;
 		if (obj.ui.guestSort === undefined) obj.ui.guestSort = 'unassignedFirst';
-		if (obj.ui.guestUnassignedOnly === undefined) obj.ui.guestUnassignedOnly = false;
+		if (obj.ui.guestUnassignedOnly === undefined) obj.ui.guestUnassignedOnly = true;
 		if (obj.ui.snap === undefined) obj.ui.snap = false;
 		if (obj.ui.grid === undefined) obj.ui.grid = 64;
 		if (obj.ui.showGrid === undefined) obj.ui.showGrid = true;

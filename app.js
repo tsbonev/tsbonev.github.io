@@ -39,7 +39,6 @@
 			const newLang = currentLang === 'en' ? 'bg' : 'en';
 			setLanguage(newLang);
 			window.i18n.updateUI();
-			document.getElementById('languageBtn').textContent = newLang === 'bg' ? '🇺🇸' : '🇧🇬';
 		});
 
 		// View toggle

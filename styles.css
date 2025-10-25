@@ -134,16 +134,16 @@ body {
 .toolbar #addCircleTableBtn,
 .toolbar #addRectTableBtn,
 .toolbar #addSeparatorBtn {
-	background: #22c55e;
-	border-color: #22c55e;
+	background: #15803d;
+	border-color: #15803d;
 	color: white;
 }
 
 .toolbar #addCircleTableBtn:hover,
 .toolbar #addRectTableBtn:hover,
 .toolbar #addSeparatorBtn:hover {
-	background: #16a34a;
-	border-color: #16a34a;
+	background: #166534;
+	border-color: #166534;
 }
 
 /* Re-center Canvas Button - Blue theme */
@@ -185,14 +185,14 @@ body {
 }
 
 .toolbar #exportBtn {
-	background: #8b5cf6;
-	border-color: #8b5cf6;
+	background: #3b82f6;
+	border-color: #3b82f6;
 	color: white;
 }
 
 .toolbar #exportBtn:hover {
-	background: #7c3aed;
-	border-color: #7c3aed;
+	background: #2563eb;
+	border-color: #2563eb;
 }
 
 /* Print Buttons - Dark Gray theme */
@@ -685,7 +685,9 @@ body {
 	font-size: 14px;
 	line-height: 1;
 	color: #ffffff;
-	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+	-webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.4);
+	text-stroke: 0.3px rgba(0, 0, 0, 0.4);
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 	user-select: none;
 	transition: all 0.3s ease;
 	z-index: 10;
@@ -1548,6 +1550,9 @@ button {
 	font-weight: 600;
 	font-size: 12px;
 	border-radius: 50%;
+	-webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.4);
+	text-stroke: 0.3px rgba(0, 0, 0, 0.4);
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .seat-picture {
@@ -1713,6 +1718,9 @@ button {
 	font-weight: 600;
 	font-size: 12px;
 	border-radius: inherit;
+	-webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.4);
+	text-stroke: 0.3px rgba(0, 0, 0, 0.4);
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .table-card-guest-info {
