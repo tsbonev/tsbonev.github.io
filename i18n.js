@@ -14,6 +14,18 @@
 			'redoBtn': 'Redo',
 			'exportBtn': 'Export Plan',
 			'importBtn': 'Import Plan',
+			'viewToggleBtn': 'Seating Chart',
+			'canvasViewBtn': 'Canvas View',
+
+			// Seating Chart
+			'seatingChartNoTables': 'No tables to display',
+			'tableTypeRound': 'Round',
+			'tableTypeRectangle': 'Rectangle',
+			'seatsLabel': 'seats',
+			'emptySeat': 'Empty seat',
+			'assignedLabel': 'assigned',
+			'childrenLabel': 'children',
+			'colorLabel': 'Color:',
 
 			// Sidebar
 			'guestsTitle': 'Guests',
@@ -105,6 +117,18 @@
 			'redoBtn': 'Повтори',
 			'exportBtn': 'Експорт План',
 			'importBtn': 'Импорт План',
+			'viewToggleBtn': 'Диаграма на Местата',
+			'canvasViewBtn': 'Изглед на Канваса',
+
+			// Seating Chart
+			'seatingChartNoTables': 'Няма маси за показване',
+			'tableTypeRound': 'Кръгла',
+			'tableTypeRectangle': 'Правоъгълна',
+			'seatsLabel': 'места',
+			'emptySeat': 'Празно място',
+			'assignedLabel': 'разпределени',
+			'childrenLabel': 'деца',
+			'colorLabel': 'Цвят:',
 
 			// Sidebar
 			'guestsTitle': 'Гости',

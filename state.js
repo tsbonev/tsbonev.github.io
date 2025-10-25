@@ -7,7 +7,7 @@
 			version: 1,
 			guests: [],
 			tables: [],
-			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg', sidebarCollapsed: false, pixelsPerMeter: 100 },
+			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg', sidebarCollapsed: false, pixelsPerMeter: 100, viewMode: 'canvas' },
 			pictures: { folderPath: null, folderHandle: null, imageCache: {} },
 			colorLegend: {}, // Maps color hex codes to custom labels
 			_history: { past: [], future: [], suppress: false }
@@ -28,6 +28,7 @@
 		if (obj.ui.language === undefined) obj.ui.language = 'bg';
 		if (obj.ui.sidebarCollapsed === undefined) obj.ui.sidebarCollapsed = false;
 		if (obj.ui.pixelsPerMeter === undefined) obj.ui.pixelsPerMeter = 100;
+		if (obj.ui.viewMode === undefined) obj.ui.viewMode = 'canvas';
 		if (!obj.pictures) obj.pictures = { folderPath: null, folderHandle: null, imageCache: {} };
 		if (!obj.colorLegend) obj.colorLegend = {};
 		if (!obj._history) obj._history = { past: [], future: [], suppress: false };
@@ -552,6 +553,11 @@
 		save();
 	}
 
+	function setViewMode(mode) {
+		state.ui.viewMode = mode;
+		save();
+	}
+
 	const state = load();
 
 	function setLanguage(lang) {
@@ -674,6 +680,7 @@
 		// sidebar
 		setSidebarCollapsed,
 		setPixelsPerMeter,
+		setViewMode,
 		addTableCircle,
 		addTableRect,
 		addSeparator,

@@ -38,7 +38,45 @@
 
 	function render() {
 		const { state } = window.TablePlanner;
+
+		// Check view mode and render accordingly
+		if (state.ui.viewMode === 'seatingChart') {
+			renderSeatingChart();
+		} else {
+			renderCanvas();
+		}
+
+		// Common rendering tasks
+		const seatInput = document.getElementById('seatCountInput');
+		const sel = window.TablePlanner.state.tables.find(t => t.id === window.TablePlanner.state.ui.selectedTableId);
+		if (seatInput) seatInput.value = sel ? String(sel.seats) : '';
+
+		if (window.updateCounts) window.updateCounts();
+		if (window.updateControlsVisibility) window.updateControlsVisibility();
+
+		renderGuestSidebar();
+		renderColorLegend();
+
+		// Show table guests for selected table
+		const selectedTableId = window.TablePlanner.state.ui.selectedTableId;
+		if (selectedTableId && window.TablePlanner.showTableGuests) {
+			window.TablePlanner.showTableGuests(selectedTableId);
+		} else if (window.TablePlanner.clearTableGuests) {
+			window.TablePlanner.clearTableGuests();
+		}
+
+		window.TablePlanner.bindInteractions();
+	}
+
+	function renderCanvas() {
+		const { state } = window.TablePlanner;
 		const canvas = document.getElementById('canvas');
+		const seatingChart = document.getElementById('seatingChart');
+
+		// Show canvas, hide seating chart
+		canvas.style.display = 'block';
+		seatingChart.style.display = 'none';
+
 		canvas.innerHTML = '';
 
 		// Calculate dynamic canvas bounds based on table positions
@@ -96,26 +134,208 @@
 				renderCircle(canvas, table, isSelected);
 			}
 		}
+	}
 
-		const seatInput = document.getElementById('seatCountInput');
-		const sel = window.TablePlanner.state.tables.find(t => t.id === window.TablePlanner.state.ui.selectedTableId);
-		if (seatInput) seatInput.value = sel ? String(sel.seats) : '';
+	function renderSeatingChart() {
+		const { state } = window.TablePlanner;
+		const canvas = document.getElementById('canvas');
+		const seatingChart = document.getElementById('seatingChart');
 
-		if (window.updateCounts) window.updateCounts();
-		if (window.updateControlsVisibility) window.updateControlsVisibility();
+		// Hide canvas, show seating chart
+		canvas.style.display = 'none';
+		seatingChart.style.display = 'block';
 
-		renderGuestSidebar();
-		renderColorLegend();
+		seatingChart.innerHTML = '';
 
-		// Show table guests for selected table
-		const selectedTableId = window.TablePlanner.state.ui.selectedTableId;
-		if (selectedTableId && window.TablePlanner.showTableGuests) {
-			window.TablePlanner.showTableGuests(selectedTableId);
-		} else if (window.TablePlanner.clearTableGuests) {
-			window.TablePlanner.clearTableGuests();
+		// Filter out separators and only show actual tables
+		const actualTables = state.tables.filter(t => t.type === 'rect' || t.type === 'circle');
+
+		if (actualTables.length === 0) {
+			const emptyState = document.createElement('div');
+			emptyState.className = 'seating-chart-empty';
+			emptyState.innerHTML = `
+				<div class="seating-chart-empty-icon">📋</div>
+				<div>${window.i18n.t('seatingChartNoTables')}</div>
+			`;
+			seatingChart.appendChild(emptyState);
+			return;
 		}
 
-		window.TablePlanner.bindInteractions();
+		const grid = document.createElement('div');
+		grid.className = 'seating-chart-grid';
+
+		for (const table of actualTables) {
+			const isSelected = state.ui.selectedTableIds.includes(table.id);
+			const tableCard = createTableCard(table, isSelected);
+			grid.appendChild(tableCard);
+		}
+
+		seatingChart.appendChild(grid);
+	}
+
+	function createTableCard(table, isSelected) {
+		const card = document.createElement('div');
+		card.className = `table-card ${isSelected ? 'selected' : ''}`;
+		card.dataset.tableId = table.id;
+
+		// Add subtle styling based on table type
+		if (table.type === 'circle') {
+			card.style.borderLeft = '4px solid #28a745'; // Green for round tables
+		} else {
+			card.style.borderLeft = '4px solid #007bff'; // Blue for rectangular tables
+		}
+
+		// Header with table name and seat count
+		const header = document.createElement('div');
+		header.className = 'table-card-header';
+
+		const title = document.createElement('h3');
+		title.className = 'table-card-title';
+		title.textContent = table.label;
+
+		const seats = document.createElement('div');
+		seats.className = 'table-card-seats';
+		const tableType = table.type === 'circle' ? window.i18n.t('tableTypeRound') : window.i18n.t('tableTypeRectangle');
+		seats.textContent = `${table.seats} ${window.i18n.t('seatsLabel')} • ${tableType}`;
+
+		header.appendChild(title);
+		header.appendChild(seats);
+		card.appendChild(header);
+
+		// Guests section
+		const guestsContainer = document.createElement('div');
+		guestsContainer.className = 'table-card-guests';
+
+		// Create seat assignments array
+		const seatAssignments = [];
+		for (let i = 0; i < table.seats; i++) {
+			const guestId = table.assignments && table.assignments[String(i)];
+			seatAssignments.push({ seatNumber: i + 1, guestId });
+		}
+
+		// Sort by seat number
+		seatAssignments.sort((a, b) => a.seatNumber - b.seatNumber);
+
+		// Create guest elements
+		for (const assignment of seatAssignments) {
+			const guestElement = document.createElement('div');
+
+			if (assignment.guestId) {
+				const guest = getGuestById(assignment.guestId);
+				if (guest) {
+					guestElement.className = 'table-card-guest assigned';
+
+					// Seat number
+					const seatNumber = document.createElement('div');
+					seatNumber.className = 'table-card-guest-seat';
+					seatNumber.textContent = assignment.seatNumber;
+					guestElement.appendChild(seatNumber);
+
+					// Guest picture/initials
+					const pictureContainer = document.createElement('div');
+					pictureContainer.className = `table-card-guest-picture ${guest.isChild ? 'child' : ''}`;
+
+					if (guest.picture) {
+						const img = document.createElement('img');
+						img.src = guest.picture;
+						img.alt = guest.name;
+						img.title = guest.name;
+
+						// Handle image loading errors
+						img.addEventListener('error', () => {
+							img.remove();
+							const initials = document.createElement('div');
+							initials.className = 'initials';
+							initials.textContent = getInitials(guest.name);
+							initials.style.backgroundColor = guest.color || '#6aa9ff';
+							pictureContainer.appendChild(initials);
+						});
+
+						pictureContainer.appendChild(img);
+					} else {
+						const initials = document.createElement('div');
+						initials.className = 'initials';
+						initials.textContent = getInitials(guest.name);
+						initials.style.backgroundColor = guest.color || '#6aa9ff';
+						pictureContainer.appendChild(initials);
+					}
+
+					guestElement.appendChild(pictureContainer);
+
+					// Guest info
+					const guestInfo = document.createElement('div');
+					guestInfo.className = 'table-card-guest-info';
+
+					const guestName = document.createElement('div');
+					guestName.className = 'table-card-guest-name';
+					guestName.textContent = guest.name;
+					guestInfo.appendChild(guestName);
+
+					// Add color indicator
+					const colorIndicator = document.createElement('div');
+					colorIndicator.style.width = '8px';
+					colorIndicator.style.height = '8px';
+					colorIndicator.style.borderRadius = '50%';
+					colorIndicator.style.backgroundColor = guest.color || '#6aa9ff';
+					colorIndicator.style.marginTop = '4px';
+					colorIndicator.title = `${window.i18n.t('colorLabel')} ${guest.color || '#6aa9ff'}`;
+					guestInfo.appendChild(colorIndicator);
+
+					if (guest.isChild) {
+						const childLabel = document.createElement('div');
+						childLabel.className = 'table-card-guest-child';
+						childLabel.textContent = window.i18n.t('guestChildLabel');
+						guestInfo.appendChild(childLabel);
+					}
+
+					guestElement.appendChild(guestInfo);
+				} else {
+					// Guest not found, show empty seat
+					guestElement.className = 'table-card-empty-seat';
+					guestElement.innerHTML = `
+						<div class="table-card-empty-seat-icon">${assignment.seatNumber}</div>
+						<div>${window.i18n.t('emptySeat')}</div>
+					`;
+				}
+			} else {
+				// Empty seat
+				guestElement.className = 'table-card-empty-seat';
+				guestElement.innerHTML = `
+					<div class="table-card-empty-seat-icon">${assignment.seatNumber}</div>
+					<div>${window.i18n.t('emptySeat')}</div>
+				`;
+			}
+
+			guestsContainer.appendChild(guestElement);
+		}
+
+		card.appendChild(guestsContainer);
+
+		// Footer with summary
+		const footer = document.createElement('div');
+		footer.className = 'table-card-footer';
+
+		const assignedCount = seatAssignments.filter(a => a.guestId).length;
+		const childCount = seatAssignments.filter(a => {
+			const guest = getGuestById(a.guestId);
+			return guest && guest.isChild;
+		}).length;
+
+		let summaryText = `${assignedCount}/${table.seats} ${window.i18n.t('assignedLabel')}`;
+		if (childCount > 0) {
+			summaryText += ` • ${childCount} ${window.i18n.t('childrenLabel')}`;
+		}
+
+		footer.textContent = summaryText;
+		card.appendChild(footer);
+
+		// Add click handler for selection
+		card.addEventListener('click', (e) => {
+			e.stopPropagation();
+			window.TablePlanner.selectTable(table.id);
+		});
+
+		return card;
 	}
 
 	function getGuestById(id) {
@@ -230,18 +450,18 @@
 			guests.sort((a, b) => {
 				const aAssignment = guestIdToAssignment.get(a.id);
 				const bAssignment = guestIdToAssignment.get(b.id);
-				
+
 				// Unassigned guests go to the end
 				if (!aAssignment && !bAssignment) return a.name.localeCompare(b.name);
 				if (!aAssignment) return 1;
 				if (!bAssignment) return -1;
-				
+
 				// Sort by table label first (numeric if possible)
 				const aTableNum = parseInt(aAssignment.tableLabel) || 999999;
 				const bTableNum = parseInt(bAssignment.tableLabel) || 999999;
-				
+
 				if (aTableNum !== bTableNum) return aTableNum - bTableNum;
-				
+
 				// Then by seat number
 				return aAssignment.seat - bAssignment.seat;
 			});
@@ -363,17 +583,17 @@
 		if (!legendContent) return;
 
 		const uniqueColors = window.TablePlanner.getUniqueGuestColors();
-		
+
 		// Calculate optimal dimensions
 		const dimensions = calculateLegendDimensions(uniqueColors);
-		
+
 		// Apply dynamic sizing to the legend sidebar
 		const legendSidebar = document.getElementById('legendSidebar');
 		if (legendSidebar) {
 			legendSidebar.style.width = dimensions.width + 'px';
 			legendSidebar.style.height = dimensions.height + 'px';
 		}
-		
+
 		// Clear existing content
 		legendContent.innerHTML = '';
 
@@ -395,7 +615,7 @@
 			emptyMessage.style.fontStyle = 'italic';
 			emptyMessage.style.padding = '20px';
 			legendContent.appendChild(emptyMessage);
-			
+
 			// Update button position after content is rendered
 			if (window.updateLegendButtonPosition) {
 				// Use requestAnimationFrame to ensure DOM layout is complete
@@ -476,7 +696,7 @@
 			legendItem.appendChild(labelInput);
 			legendContent.appendChild(legendItem);
 		}
-		
+
 		// Update button position after all content is rendered
 		if (window.updateLegendButtonPosition) {
 			// Use requestAnimationFrame to ensure DOM layout is complete
@@ -490,47 +710,47 @@
 		const canvasWrap = document.querySelector('.canvas-wrap');
 		const canvasHeight = canvasWrap ? canvasWrap.clientHeight : window.innerHeight - 100;
 		const canvasWidth = canvasWrap ? canvasWrap.clientWidth : window.innerWidth - 400;
-		
+
 		// Default dimensions
 		const defaultWidth = 300; // 3/4 of main sidebar width
 		const defaultHeight = Math.floor(canvasHeight * 0.33); // 1/3 of canvas height
 		const defaultInputWidth = 200; // Default input width
-		
+
 		// Calculate optimal input width based on content
 		let maxInputWidth = defaultInputWidth;
 		for (const color of uniqueColors) {
 			const label = window.TablePlanner.state.colorLegend[color] || '';
 			const placeholderLength = 'Enter label...'.length;
 			const contentLength = Math.max(label.length, placeholderLength);
-			
+
 			// Estimate width: ~8px per character + padding
 			const estimatedWidth = Math.max(contentLength * 8 + 16, 120); // Minimum 120px
 			maxInputWidth = Math.max(maxInputWidth, estimatedWidth);
 		}
-		
+
 		// Limit input width to 2x default width
 		const optimalInputWidth = Math.min(maxInputWidth, defaultInputWidth * 2);
-		
+
 		// Calculate total width: color circle + gap + input width + padding
 		const colorCircleWidth = 24;
 		const gap = 12;
 		const horizontalPadding = 32; // 16px on each side
 		const optimalWidth = colorCircleWidth + gap + optimalInputWidth + horizontalPadding;
-		
+
 		// Calculate optimal height based on number of colors
 		const headerHeight = 48; // Approximate header height
 		const itemHeight = 40; // Height per color item (including margin)
 		const padding = 24; // Top and bottom padding
 		const optimalHeight = headerHeight + (uniqueColors.length * itemHeight) + padding;
-		
+
 		// Limit height to 90% of canvas height
 		const maxHeight = Math.floor(canvasHeight * 0.9);
 		const finalHeight = Math.min(optimalHeight, maxHeight);
-		
+
 		// Ensure minimum dimensions
 		const finalWidth = Math.max(optimalWidth, 200);
 		const finalHeightMin = Math.max(finalHeight, 150);
-		
+
 		return {
 			width: finalWidth,
 			height: finalHeightMin,
@@ -823,7 +1043,7 @@
 		return ratio <= 1.05;
 	}
 
-	window.TablePlanner = Object.assign(window.TablePlanner || {}, { 
+	window.TablePlanner = Object.assign(window.TablePlanner || {}, {
 		render,
 		renderColorLegend,
 		calculateLegendDimensions
