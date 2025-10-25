@@ -613,6 +613,29 @@
 		return label;
 	}
 
+	function createSizeDisplay(table) {
+		if (!table.size) return null;
+
+		const sizeDisplay = document.createElement('div');
+		sizeDisplay.className = 'table-size-display';
+		sizeDisplay.style.position = 'absolute';
+		sizeDisplay.style.top = '8px';
+		sizeDisplay.style.right = '8px';
+		sizeDisplay.style.fontSize = '11px';
+		sizeDisplay.style.fontWeight = '500';
+		sizeDisplay.style.color = '#666';
+		sizeDisplay.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+		sizeDisplay.style.padding = '2px 6px';
+		sizeDisplay.style.borderRadius = '4px';
+		sizeDisplay.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+		sizeDisplay.style.pointerEvents = 'none';
+
+		const unit = window.i18n.t('unitMeter');
+		sizeDisplay.textContent = `${table.size.width.toFixed(1)}${unit} x ${table.size.height.toFixed(1)}${unit}`;
+
+		return sizeDisplay;
+	}
+
 	function renderCircle(canvas, table, isSelected) {
 		const node = document.createElement('div');
 		node.className = 'table circle' + (isSelected ? ' selected' : '');
@@ -624,6 +647,13 @@
 		node.title = window.i18n.t('tableTitle', { label: table.label });
 
 		node.appendChild(createLabel(table));
+
+		// Add size display
+		const sizeDisplay = createSizeDisplay(table);
+		if (sizeDisplay) {
+			node.appendChild(sizeDisplay);
+		}
+
 		if (isSelected) {
 			addSelectionOutline(node, 'circle', { cx: table.x, cy: table.y, radius: table.radius });
 
@@ -671,6 +701,13 @@
 		node.title = window.i18n.t('tableTitle', { label: table.label });
 
 		node.appendChild(createLabel(table));
+
+		// Add size display
+		const sizeDisplay = createSizeDisplay(table);
+		if (sizeDisplay) {
+			node.appendChild(sizeDisplay);
+		}
+
 		if (isSelected) {
 			addSelectionOutline(node, 'rect', { x: table.x, y: table.y, w: table.width, h: table.height });
 

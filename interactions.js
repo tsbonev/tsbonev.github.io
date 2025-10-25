@@ -464,6 +464,10 @@
 			resize._renderScheduled = true;
 			requestAnimationFrame(() => {
 				window.TablePlanner.render();
+				// Update the size input fields to reflect the new values
+				if (window.updateControlsVisibility) {
+					window.updateControlsVisibility();
+				}
 				resize._renderScheduled = false;
 			});
 		}

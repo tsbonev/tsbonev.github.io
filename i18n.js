@@ -82,7 +82,14 @@
 			'tableTitle': 'Table {label}',
 			'separatorTitle': 'Separator',
 			'seatNumber': 'Seat {number}',
-			'toggleSidebar': 'Toggle Sidebar'
+			'toggleSidebar': 'Toggle Sidebar',
+			'unitMeter': 'm',
+			'tableSizeLabel': 'Size:',
+			'tableSizeWidth': 'Width:',
+			'tableSizeHeight': 'Height:',
+			'tieSizeToCanvasBtn': '📏 Tie to Canvas',
+			'tieSizeToCanvasBtnActive': '📏 Tied to Canvas',
+			'pixelsPerMeterLabel': 'Pixels per meter:'
 		},
 		bg: {
 			// Page title
@@ -166,7 +173,14 @@
 			'tableTitle': 'Маса {label}',
 			'separatorTitle': 'Разделител',
 			'seatNumber': 'Място {number}',
-			'toggleSidebar': 'Превключи Страничната Лента'
+			'toggleSidebar': 'Превключи Страничната Лента',
+			'unitMeter': 'м',
+			'tableSizeLabel': 'Размер:',
+			'tableSizeWidth': 'Ширина:',
+			'tableSizeHeight': 'Височина:',
+			'tieSizeToCanvasBtn': '📏 Свържи с Canvas',
+			'tieSizeToCanvasBtnActive': '📏 Свързано с Canvas',
+			'pixelsPerMeterLabel': 'Пиксели на метър:'
 		}
 	};
 

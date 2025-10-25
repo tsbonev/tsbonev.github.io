@@ -44,6 +44,12 @@
 
 		document.getElementById('applySeatCountBtn').addEventListener('click', onApplySeatCount);
 
+		// table size controls
+		document.getElementById('tableSizeWidthInput').addEventListener('change', onTableSizeChange);
+		document.getElementById('tableSizeHeightInput').addEventListener('change', onTableSizeChange);
+		document.getElementById('pixelsPerMeterInput').addEventListener('change', onPixelsPerMeterChange);
+		document.getElementById('tieSizeToCanvasBtn').addEventListener('click', onTieSizeToCanvas);
+
 		// rect controls
 		document.getElementById('oneSidedToggle').addEventListener('change', onOneSidedToggle);
 		document.getElementById('oneSideGroup').addEventListener('change', onOneSideChange);
@@ -119,6 +125,44 @@
 		const twoSided = t.type === 'rect' && !t.rectOneSided && sides.length === 2;
 		const isOdd = t && (t.seats % 2) === 1;
 		if (oddExtraGroup) oddExtraGroup.style.display = (twoSided && isOdd) ? '' : 'none';
+
+		// Sync size input values
+		const widthInput = document.getElementById('tableSizeWidthInput');
+		const heightInput = document.getElementById('tableSizeHeightInput');
+		const pixelsPerMeterInput = document.getElementById('pixelsPerMeterInput');
+		if (widthInput && heightInput && t.size) {
+			widthInput.value = t.size.width.toFixed(1);
+			heightInput.value = t.size.height.toFixed(1);
+		}
+		if (pixelsPerMeterInput) {
+			pixelsPerMeterInput.value = window.TablePlanner.state.ui.pixelsPerMeter || 100;
+		}
+
+		// Update tie button state
+		updateTieSizeButtonState();
+	}
+
+	function updateTieSizeButtonState() {
+		const tieBtn = document.getElementById('tieSizeToCanvasBtn');
+		if (!tieBtn) return;
+
+		const sel = window.TablePlanner.state.ui.selectedTableId;
+		if (!sel) {
+			tieBtn.classList.remove('active');
+			tieBtn.textContent = window.i18n.t('tieSizeToCanvasBtn');
+			return;
+		}
+
+		const table = window.TablePlanner.state.tables.find(t => t.id === sel);
+		const isTied = table && table.sizeTiedToCanvas;
+
+		if (isTied) {
+			tieBtn.classList.add('active');
+			tieBtn.textContent = window.i18n.t('tieSizeToCanvasBtnActive');
+		} else {
+			tieBtn.classList.remove('active');
+			tieBtn.textContent = window.i18n.t('tieSizeToCanvasBtn');
+		}
 	}
 
 	function computeRectSeatSides(table) {
@@ -264,6 +308,61 @@
 		updateCounts();
 	}
 
+	function onTableSizeChange(e) {
+		const sel = window.TablePlanner.state.ui.selectedTableId;
+		if (!sel) return;
+
+		const widthInput = document.getElementById('tableSizeWidthInput');
+		const heightInput = document.getElementById('tableSizeHeightInput');
+		const width = Number(widthInput.value);
+		const height = Number(heightInput.value);
+
+		if (!Number.isFinite(width) || !Number.isFinite(height)) return;
+
+		window.TablePlanner.updateTableSizeProperty(sel, width, height);
+	}
+
+	function onPixelsPerMeterChange(e) {
+		const ratio = Number(e.target.value);
+		if (!Number.isFinite(ratio) || ratio < 10 || ratio > 1000) return;
+
+		window.TablePlanner.setPixelsPerMeter(ratio);
+
+		// Update size values for all tables to reflect the new ratio
+		const selectedTableId = window.TablePlanner.state.ui.selectedTableId;
+		if (selectedTableId) {
+			window.TablePlanner.syncSizeFromCanvas(selectedTableId);
+			if (window.updateControlsVisibility) {
+				window.updateControlsVisibility();
+			}
+		}
+	}
+
+	function onTieSizeToCanvas() {
+		const sel = window.TablePlanner.state.ui.selectedTableId;
+		if (!sel) return;
+
+		// Toggle the tie state for this specific table
+		window.TablePlanner.toggleSizeTiedToCanvas(sel);
+
+		// Update button appearance
+		updateTieSizeButtonState();
+
+		// If we just enabled tying, sync the current canvas dimensions to size
+		const table = window.TablePlanner.state.tables.find(t => t.id === sel);
+		if (table && table.sizeTiedToCanvas) {
+			window.TablePlanner.syncSizeFromCanvas(sel);
+
+			// Update the input fields to reflect the new values
+			if (table.size) {
+				const widthInput = document.getElementById('tableSizeWidthInput');
+				const heightInput = document.getElementById('tableSizeHeightInput');
+				if (widthInput) widthInput.value = table.size.width.toFixed(1);
+				if (heightInput) heightInput.value = table.size.height.toFixed(1);
+			}
+		}
+	}
+
 	function syncGridControls() {
 		if (!window.TablePlanner || !window.TablePlanner.state) return;
 		const s = window.TablePlanner.state;
@@ -301,11 +400,19 @@
 				const obj = JSON.parse(String(reader.result));
 				const err = validateImport(obj);
 				if (err) { alert(window.i18n.t('importFailed', { error: err })); return; }
+
+				// Apply migration to imported data to ensure all properties are initialized
+				window.TablePlanner.migrate(obj);
+
 				window.TablePlanner.state.version = obj.version || 1;
 				window.TablePlanner.state.guests = Array.isArray(obj.guests) ? obj.guests : [];
 				window.TablePlanner.state.tables = Array.isArray(obj.tables) ? obj.tables : [];
 				window.TablePlanner.state.ui = Object.assign({ selectedTableId: null, zoom: 1, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 12, showGrid: true }, obj.ui || {});
 				window.TablePlanner.state.colorLegend = obj.colorLegend || {};
+
+				// Initialize size properties for tables that don't have them
+				initializeImportedTableSizes();
+
 				window.TablePlanner.save();
 				syncGridControls();
 				window.TablePlanner.render();
@@ -434,7 +541,7 @@
 			layout.classList.add('sidebar-collapsed');
 			window.TablePlanner.setSidebarCollapsed(true);
 		}
-		
+
 		// Update legend button position when main sidebar state changes
 		updateLegendButtonPosition();
 	}
@@ -448,7 +555,7 @@
 		} else {
 			legendSidebar.classList.add('open');
 		}
-		
+
 		// Update button position after toggling
 		updateLegendButtonPosition();
 	}
@@ -457,26 +564,26 @@
 		const legendToggle = document.getElementById('legendToggle');
 		const legendSidebar = document.getElementById('legendSidebar');
 		const layout = document.querySelector('.layout');
-		
+
 		if (!legendToggle || !legendSidebar) return;
-		
+
 		const isLegendOpen = legendSidebar.classList.contains('open');
 		const isMainSidebarCollapsed = layout.classList.contains('sidebar-collapsed');
-		
+
 		if (isLegendOpen) {
 			// When legend is open, position button above it
 			const legendHeight = legendSidebar.offsetHeight;
 			const appliedHeight = legendSidebar.style.height;
-			
+
 			// Parse the applied height to get the numeric value
 			const appliedHeightValue = appliedHeight ? parseInt(appliedHeight) : legendHeight;
-			
+
 			// Use the applied height if available, otherwise fall back to offsetHeight
 			const finalHeight = appliedHeightValue || legendHeight;
 			const buttonBottom = finalHeight + 30; // 20px from bottom + 10px gap
-			
+
 			legendToggle.style.bottom = buttonBottom + 'px';
-			
+
 			// Adjust right position based on main sidebar state
 			if (isMainSidebarCollapsed) {
 				legendToggle.style.right = '20px';
@@ -486,7 +593,7 @@
 		} else {
 			// When legend is closed, use default position
 			legendToggle.style.bottom = '20px';
-			
+
 			if (isMainSidebarCollapsed) {
 				legendToggle.style.right = '20px';
 			} else {
@@ -500,6 +607,12 @@
 		if (window.TablePlanner.state.ui.sidebarCollapsed) {
 			layout.classList.add('sidebar-collapsed');
 		}
+	}
+
+	function initializeImportedTableSizes() {
+		// The migration logic now handles size calculation and toggle state
+		// This function is kept for any additional import-specific logic if needed
+		// All tables should now have proper size properties and be toggled to canvas
 	}
 
 	document.addEventListener('DOMContentLoaded', bootstrap);

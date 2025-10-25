@@ -7,7 +7,7 @@
 			version: 1,
 			guests: [],
 			tables: [],
-			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg', sidebarCollapsed: false },
+			ui: { selectedTableId: null, selectedTableIds: [], zoom: 1, panX: 0, panY: 0, guestSort: 'unassignedFirst', guestUnassignedOnly: false, snap: false, grid: 64, showGrid: true, language: 'bg', sidebarCollapsed: false, pixelsPerMeter: 100 },
 			pictures: { folderPath: null, folderHandle: null, imageCache: {} },
 			colorLegend: {}, // Maps color hex codes to custom labels
 			_history: { past: [], future: [], suppress: false }
@@ -27,6 +27,7 @@
 		if (obj.ui.showGrid === undefined) obj.ui.showGrid = true;
 		if (obj.ui.language === undefined) obj.ui.language = 'bg';
 		if (obj.ui.sidebarCollapsed === undefined) obj.ui.sidebarCollapsed = false;
+		if (obj.ui.pixelsPerMeter === undefined) obj.ui.pixelsPerMeter = 100;
 		if (!obj.pictures) obj.pictures = { folderPath: null, folderHandle: null, imageCache: {} };
 		if (!obj.colorLegend) obj.colorLegend = {};
 		if (!obj._history) obj._history = { past: [], future: [], suppress: false };
@@ -36,6 +37,18 @@
 				if (!t.oneSide) t.oneSide = 'top';
 				if (!t.oddExtraSide) t.oddExtraSide = 'top';
 			}
+			// Add default size property if missing - calculate from canvas dimensions
+			if (!t.size) {
+				const ratio = obj.ui?.pixelsPerMeter || 100; // Use imported ratio or default
+				if (t.type === 'circle') {
+					const diameter = t.radius * 2;
+					t.size = { width: diameter / ratio, height: diameter / ratio };
+				} else if (t.type === 'rect') {
+					t.size = { width: t.width / ratio, height: t.height / ratio };
+				}
+			}
+			// Add default sizeTiedToCanvas property if missing - set to true for imported tables
+			if (t.sizeTiedToCanvas === undefined) t.sizeTiedToCanvas = true;
 		}
 		// Migrate guests to add picture and isChild properties
 		for (const g of (obj.guests || [])) {
@@ -113,10 +126,10 @@
 	}
 
 	function save() {
-		const persisted = { 
-			version: state.version, 
-			guests: state.guests, 
-			tables: state.tables, 
+		const persisted = {
+			version: state.version,
+			guests: state.guests,
+			tables: state.tables,
 			ui: state.ui,
 			colorLegend: state.colorLegend
 		};
@@ -169,7 +182,9 @@
 			x, y,
 			radius: 70,
 			seats: 8,
-			assignments: {}
+			assignments: {},
+			size: { width: 1.4, height: 1.4 }, // Default size in meters
+			sizeTiedToCanvas: false
 		};
 		state.tables.push(table);
 		state.ui.selectedTableId = table.id;
@@ -193,7 +208,9 @@
 			assignments: {},
 			rectOneSided: false,
 			oneSide: 'top',
-			oddExtraSide: 'top'
+			oddExtraSide: 'top',
+			size: { width: 1.6, height: 1.0 }, // Default size in meters
+			sizeTiedToCanvas: false
 		};
 		state.tables.push(table);
 		state.ui.selectedTableId = table.id;
@@ -313,6 +330,12 @@
 		const t = state.tables.find(t => t.id === id);
 		if (!t || t.type !== 'circle') return;
 		t.radius = Math.max(40, Math.min(220, radius));
+
+		// If size is tied to canvas, update the size property
+		if (t.sizeTiedToCanvas) {
+			syncSizeFromCanvas(id);
+		}
+
 		save();
 	}
 
@@ -331,6 +354,12 @@
 			t.width = Math.max(80, Math.min(600, width));   // Regular min width for rectangles
 			t.height = Math.max(60, Math.min(600, height)); // Regular min height for rectangles
 		}
+
+		// If size is tied to canvas, update the size property
+		if (t.sizeTiedToCanvas) {
+			syncSizeFromCanvas(id);
+		}
+
 		save();
 	}
 
@@ -341,6 +370,67 @@
 	function addGuest(name, color, isChild = false) { pushHistory(); const g = { id: 'g_' + Math.random().toString(36).slice(2, 8), name: name.trim(), color: color || '#6aa9ff', picture: null, isChild: !!isChild }; if (!g.name) return; state.guests.push(g); save(); window.TablePlanner.render(); if (window.updateLegendButtonPosition) window.updateLegendButtonPosition(); }
 	function updateGuest(id, patch) { pushHistory(); const g = state.guests.find(g => g.id === id); if (!g) return; Object.assign(g, patch); save(); window.TablePlanner.render(); if (window.updateLegendButtonPosition) window.updateLegendButtonPosition(); }
 	function deleteGuest(id) { pushHistory(); state.guests = state.guests.filter(g => g.id !== id); for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === id) delete t.assignments[k]; } } save(); window.TablePlanner.render(); if (window.updateLegendButtonPosition) window.updateLegendButtonPosition(); }
+	function updateTableSizeProperty(id, width, height) {
+		pushHistory();
+		const t = state.tables.find(t => t.id === id);
+		if (!t) return;
+		if (!t.size) t.size = { width: 1.0, height: 1.0 };
+		t.size.width = Math.max(0.1, width);
+		t.size.height = Math.max(0.1, height);
+
+		// Also update canvas dimensions based on size using configurable ratio
+		const ratio = state.ui.pixelsPerMeter || 100;
+		if (t.type === 'circle') {
+			const diameter = Math.max(t.size.width, t.size.height) * ratio;
+			t.radius = Math.max(40, Math.min(220, diameter / 2));
+		} else if (t.type === 'rect' || t.type === 'separator') {
+			const canvasWidth = t.size.width * ratio;
+			const canvasHeight = t.size.height * ratio;
+
+			if (t.type === 'separator') {
+				t.width = Math.max(40, Math.min(600, canvasWidth));
+				t.height = Math.max(10, Math.min(600, canvasHeight));
+			} else {
+				t.width = Math.max(80, Math.min(600, canvasWidth));
+				t.height = Math.max(60, Math.min(600, canvasHeight));
+			}
+		}
+
+		save();
+		window.TablePlanner.render();
+	}
+
+	function syncSizeFromCanvas(id) {
+		const t = state.tables.find(t => t.id === id);
+		if (!t) return;
+
+		if (!t.size) t.size = { width: 1.0, height: 1.0 };
+
+		// Convert canvas dimensions to size using configurable ratio
+		const ratio = state.ui.pixelsPerMeter || 100;
+		if (t.type === 'circle') {
+			const diameter = t.radius * 2;
+			t.size.width = diameter / ratio;
+			t.size.height = diameter / ratio;
+		} else if (t.type === 'rect' || t.type === 'separator') {
+			t.size.width = t.width / ratio;
+			t.size.height = t.height / ratio;
+		}
+
+		save();
+	}
+
+	function toggleSizeTiedToCanvas(tableId) {
+		pushHistory();
+		const t = state.tables.find(t => t.id === tableId);
+		if (!t) return;
+		t.sizeTiedToCanvas = !t.sizeTiedToCanvas;
+		save();
+	}
+
+	function addGuest(name, color) { pushHistory(); const g = { id: 'g_' + Math.random().toString(36).slice(2, 8), name: name.trim(), color: color || '#6aa9ff', picture: null }; if (!g.name) return; state.guests.push(g); save(); window.TablePlanner.render(); }
+	function updateGuest(id, patch) { pushHistory(); const g = state.guests.find(g => g.id === id); if (!g) return; Object.assign(g, patch); save(); window.TablePlanner.render(); }
+	function deleteGuest(id) { pushHistory(); state.guests = state.guests.filter(g => g.id !== id); for (const t of state.tables) { for (const k in t.assignments) { if (t.assignments[k] === id) delete t.assignments[k]; } } save(); window.TablePlanner.render(); }
 	function setGuestSort(sort) { state.ui.guestSort = sort; save(); window.TablePlanner.render(); }
 	function setGuestUnassignedOnly(flag) { state.ui.guestUnassignedOnly = !!flag; save(); window.TablePlanner.render(); }
 	function setGuestSearch(search) { state.ui.guestSearch = search; save(); window.TablePlanner.render(); }
@@ -357,7 +447,7 @@
 		return Array.from(colors).sort((a, b) => {
 			const labelA = state.colorLegend[a] || '';
 			const labelB = state.colorLegend[b] || '';
-			
+
 			// If both have labels, sort by label
 			if (labelA && labelB) {
 				return labelA.localeCompare(labelB);
@@ -386,29 +476,29 @@
 		// Find the input field for this color and update its value without losing focus
 		const legendContent = document.getElementById('legendContent');
 		if (!legendContent) return;
-		
+
 		const input = legendContent.querySelector(`input[data-color="${color}"]`);
 		if (input && document.activeElement !== input) {
 			input.value = label || '';
 		}
-		
+
 		// Recalculate dimensions if the label length might affect sizing
 		const uniqueColors = getUniqueGuestColors();
-		const dimensions = window.TablePlanner.calculateLegendDimensions ? 
+		const dimensions = window.TablePlanner.calculateLegendDimensions ?
 			window.TablePlanner.calculateLegendDimensions(uniqueColors) : null;
-		
+
 		if (dimensions) {
 			const legendSidebar = document.getElementById('legendSidebar');
 			if (legendSidebar) {
 				legendSidebar.style.width = dimensions.width + 'px';
 				legendSidebar.style.height = dimensions.height + 'px';
 			}
-			
+
 			// Update input width if needed
 			if (input) {
 				input.style.width = dimensions.inputWidth + 'px';
 			}
-			
+
 			// Update button position after dimensions change
 			// Use requestAnimationFrame to ensure DOM layout is complete
 			if (window.updateLegendButtonPosition) {
@@ -454,6 +544,11 @@
 
 	function setSidebarCollapsed(collapsed) {
 		state.ui.sidebarCollapsed = !!collapsed;
+		save();
+	}
+
+	function setPixelsPerMeter(ratio) {
+		state.ui.pixelsPerMeter = Math.max(10, Math.min(1000, ratio));
 		save();
 	}
 
@@ -562,6 +657,7 @@
 
 	window.TablePlanner = Object.assign(window.TablePlanner || {}, {
 		state,
+		migrate,
 		undo,
 		redo,
 		pushHistory,
@@ -577,6 +673,7 @@
 		resetView,
 		// sidebar
 		setSidebarCollapsed,
+		setPixelsPerMeter,
 		addTableCircle,
 		addTableRect,
 		addSeparator,
@@ -592,6 +689,9 @@
 		updateMultipleTablePositions,
 		updateTableRadius,
 		updateTableSize,
+		updateTableSizeProperty,
+		syncSizeFromCanvas,
+		toggleSizeTiedToCanvas,
 		setRectOneSided,
 		setRectOneSide,
 		setRectOddExtraSide,

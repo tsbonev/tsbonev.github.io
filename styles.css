@@ -693,6 +693,78 @@ body {
 	padding: 4px 6px;
 }
 
+.table-size-controls {
+	display: grid;
+	gap: 6px;
+	padding: 8px;
+	border: 1px dashed #e5e7eb;
+	border-radius: 6px;
+	margin-top: 8px;
+}
+
+.table-size-controls h4 {
+	margin: 0 0 6px 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: #374151;
+}
+
+.table-size-controls label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+}
+
+.table-size-controls input[type="number"] {
+	width: 60px;
+	padding: 4px 6px;
+	border: 1px solid #d1d5db;
+	border-radius: 4px;
+	font-size: 13px;
+}
+
+.table-size-controls .unit {
+	font-size: 12px;
+	color: #6b7280;
+	font-weight: 500;
+	min-width: 15px;
+}
+
+.table-size-controls button {
+	padding: 6px 12px;
+	border: 1px solid #d1d5db;
+	border-radius: 4px;
+	background: #ffffff;
+	font-size: 12px;
+	font-weight: 500;
+	color: #374151;
+	cursor: pointer;
+	margin-top: 4px;
+	transition: all 0.2s ease;
+}
+
+.table-size-controls button:hover {
+	background: #f9fafb;
+	border-color: #9ca3af;
+}
+
+.table-size-controls button:active {
+	background: #f3f4f6;
+	border-color: #6b7280;
+}
+
+.table-size-controls button.active {
+	background: #3b82f6;
+	color: #ffffff;
+	border-color: #2563eb;
+}
+
+.table-size-controls button.active:hover {
+	background: #2563eb;
+	border-color: #1d4ed8;
+}
+
 .rect-controls {
 	display: grid;
 	gap: 6px;
