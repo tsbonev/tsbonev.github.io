@@ -328,13 +328,17 @@
 
 		window.TablePlanner.setPixelsPerMeter(ratio);
 
-		// Update size values for all tables to reflect the new ratio
-		const selectedTableId = window.TablePlanner.state.ui.selectedTableId;
-		if (selectedTableId) {
-			window.TablePlanner.syncSizeFromCanvas(selectedTableId);
-			if (window.updateControlsVisibility) {
-				window.updateControlsVisibility();
+		// Update size values for ALL tables that have their size tied to canvas
+		const state = window.TablePlanner.state;
+		for (const table of state.tables) {
+			if (table.sizeTiedToCanvas) {
+				window.TablePlanner.syncSizeFromCanvas(table.id);
 			}
+		}
+
+		// Update the controls visibility for the currently selected table
+		if (window.updateControlsVisibility) {
+			window.updateControlsVisibility();
 		}
 	}
 
