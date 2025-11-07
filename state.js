@@ -379,21 +379,24 @@
 		t.size.width = Math.max(0.1, width);
 		t.size.height = Math.max(0.1, height);
 
-		// Also update canvas dimensions based on size using configurable ratio
-		const ratio = state.ui.pixelsPerMeter || 100;
-		if (t.type === 'circle') {
-			const diameter = Math.max(t.size.width, t.size.height) * ratio;
-			t.radius = Math.max(40, Math.min(220, diameter / 2));
-		} else if (t.type === 'rect' || t.type === 'separator') {
-			const canvasWidth = t.size.width * ratio;
-			const canvasHeight = t.size.height * ratio;
+		// Only update canvas dimensions if size is tied to canvas
+		// When untied, size input should only update the display, not the actual canvas size
+		if (t.sizeTiedToCanvas) {
+			const ratio = state.ui.pixelsPerMeter || 100;
+			if (t.type === 'circle') {
+				const diameter = Math.max(t.size.width, t.size.height) * ratio;
+				t.radius = Math.max(40, Math.min(220, diameter / 2));
+			} else if (t.type === 'rect' || t.type === 'separator') {
+				const canvasWidth = t.size.width * ratio;
+				const canvasHeight = t.size.height * ratio;
 
-			if (t.type === 'separator') {
-				t.width = Math.max(40, Math.min(600, canvasWidth));
-				t.height = Math.max(10, Math.min(600, canvasHeight));
-			} else {
-				t.width = Math.max(80, Math.min(600, canvasWidth));
-				t.height = Math.max(60, Math.min(600, canvasHeight));
+				if (t.type === 'separator') {
+					t.width = Math.max(40, Math.min(600, canvasWidth));
+					t.height = Math.max(10, Math.min(600, canvasHeight));
+				} else {
+					t.width = Math.max(80, Math.min(600, canvasWidth));
+					t.height = Math.max(60, Math.min(600, canvasHeight));
+				}
 			}
 		}
 
